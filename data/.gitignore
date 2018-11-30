@@ -1,0 +1,5 @@
+*.tgz
+*.train
+*.test
+*.conllu
+*.txt

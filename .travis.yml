@@ -1,0 +1,17 @@
+language: julia
+
+## https://docs.travis-ci.com/user/languages/julia
+## If you leave the julia: key out of your .travis.yml, Travis CI will use the most recent release.
+julia:
+  - nightly
+os:
+  - linux
+  - osx
+notifications:
+  email: false
+
+# script:
+#   - julia -e 'using Pkg; Pkg.add("Documenter"); using KnetLayers, Documenter; cd(KnetLayers.dir("docs")); include("make.jl")'
+
+after_success:
+  - julia -e 'using Pkg; Pkg.add("Documenter"); using Morse, Documenter; cd(Morse.dir("docs")); include("make.jl")'

@@ -109,12 +109,14 @@ function main(ARGS=[]; config = intro(ARGS))
             model = ModelType(config, vocab)
             setoptim!(model, eval(Meta.parse(config[:optimizer])))
         end
-
         trainmodel!(model, data, config, vocab, parser; logFile=logFile)
+
+        model=nothing; Knet.gc();
 
         if isfile(config[:bestModel]*".jld2")
             model,_,_,_ = loadModel(config[:bestModel]*".jld2")
         end
+        
     elseif config[:mode] == 2 # generate
         model,_,_,_ = loadModel(config[:modelFile])
     elseif config[:mode] == 3

@@ -173,6 +173,7 @@ function recurrentPredict(M::Sequential, d::SentenceBatch, hiddens1, hiddens2; s
     wordNumber, timeSteps = size(d.seqOutputs)
     preds = zeros(Int, wordNumber, timeSteps)
     input = fill(startIndex, wordNumber)
+    total = 0.0
     for i=1:timeSteps
         hiddens1, hiddens2 = M.decoder(M.outputEmbed(input), hiddens1, hiddens2; training=false)
         h2 = hiddens2[1]

@@ -115,10 +115,10 @@ function createsplits(data::Vector,seed::Integer,tsize::Integer)
         end
     elseif l==2
         if tsize < tl
-            testsize = min(tl-tsize, floor(Int,tl*0.1), 2length(data[2]))
+            testsize = min(tl-tsize, floor(Int,tl*0.1), 2.5length(data[2]))
             data = push!(splitdata(data[1],[tsize,testsize]),data[2])
         else
-            devratio = min(floor(Int,length(data[1])*0.1), 2length(data[2])) / length(data[1])
+            devratio = min(floor(Int,length(data[1])*0.1), 2.5length(data[2])) / length(data[1])
             data = push!(splitdata(data[1],[0.9,devratio]),data[2])
         end
     else

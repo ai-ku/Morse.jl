@@ -515,7 +515,7 @@ function loss(M::MorseDis, d::SentenceBatch; v::Vocabulary)
     hiddens1 = M.contextEncoder(hiddens2[1]; training=true)
     # output encoder
     esize = size(M.outputEmbed.weight,1);
-    tagEmbeddings = [reshape(M.outputEncoder.dropout(M.outputEmbed(d.seqOutputs[i,range])),esize,1,length(range)) for (i,range)=enumerate(d.tagRange)]
+    tagEmbeddings = [reshape(M.outputEncoder.dropout(M.outputEmbed(d.seqOutputs[i,first(range):last(range)+1])),esize,1,length(range)+1) for (i,range)=enumerate(d.tagRange)]
     hiddens3 = M.outputEncoder(tagEmbeddings)
     # Decoder
     hiddens2 = hiddens2 .+ hiddens3
@@ -550,7 +550,7 @@ function  predict(M::MorseDis, d::SentenceBatch; v::Vocabulary)
             input = v.specialIndices.bow
             outEmbedding = [];
             seq = [analysis.lemma; analysis.tags; v.specialIndices.eow]
-            tagRange = length(analysis.lemma)+1:length(seq)-1
+            tagRange = length(analysis.lemma)+1:length(seq)
 
             for o in seq
                 rnninput = M.outputEmbed([input])

@@ -34,7 +34,7 @@ function fgbias!(l::LSTM)
         for layer in ("l1","l2")
              gateparams = get(l.gatesview,string("b_",inputSource,"_f_",layer),nothing)
              if gateparams !== nothing
-                 gateparams .= 0.5
+                  copyto!(gateparams,oftype(gateparams,0.5ones(length(gateparams))))
              end
         end
     end

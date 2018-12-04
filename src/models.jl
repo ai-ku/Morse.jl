@@ -27,6 +27,20 @@ abstract type Sequential <: Model;end;
 abstract type Discriminative <: Model;end;
 
 #####
+##### Utils
+#####
+function fgbias!(l::LSTM)
+    for inputSource in ("i","h")
+        for layer in ("l1","l2")
+             gateparams = get(l.gatesview,string("b_",inputSource,"_f_",layer),nothing)
+             if gateparams !== nothing
+                 gateparams .= 0.5
+             end
+        end
+    end
+    return l
+end
+#####
 ##### Primitives
 #####
 
@@ -46,7 +60,7 @@ end
 WordEncoder(o::Dict,v::Vocabulary) = WordEncoder(
     Embed(input=length(v.chars), output=o[:embedSizes][1]),
     Dropout(p=o[:dropouts]),
-    LSTM(input=o[:embedSizes][1], hidden=o[:hiddenSizes][1], seed=o[:seed])
+    LSTM(input=o[:embedSizes][1], hidden=o[:hiddenSizes][1], seed=o[:seed]) |> fgbias!
 )
 
 function (M::WordEncoder)(inputs::Vector{Int}, sizes::Vector{Int}, indices::Vector{Int}; training=false)
@@ -67,7 +81,7 @@ struct ContextEncoder
 end
 
 ContextEncoder(o::Dict,v::Vocabulary) = ContextEncoder(
-    LSTM(input=o[:hiddenSizes][1], hidden=o[:hiddenSizes][2], bidirectional=true, seed=o[:seed]),
+    LSTM(input=o[:hiddenSizes][1], hidden=o[:hiddenSizes][2], bidirectional=true, seed=o[:seed]) |> fgbias!,
     Dense(input=2o[:hiddenSizes][2],output=o[:hiddenSizes][3], activation=ReLU()),
     Dropout(p=o[:dropouts])
 )
@@ -94,7 +108,7 @@ struct OutputEncoder
 end
 
 OutputEncoder(o::Dict,v::Vocabulary) = OutputEncoder(
-    LSTM(input=o[:embedSizes][2], hidden=o[:hiddenSizes][4], seed=o[:seed]),
+    LSTM(input=o[:embedSizes][2], hidden=o[:hiddenSizes][4], seed=o[:seed]) |> fgbias!,
     Dropout(p=o[:dropouts]),
     o[:previous],
     KnetLayers.arrtype(zeros(o[:hiddenSizes][4],1,1))
@@ -140,8 +154,8 @@ function (M::Decoder)(input, hiddens1, hiddens2; training=false)
 end
 
 Decoder(o::Dict,v::Vocabulary) = Decoder(
-    LSTM(input=o[:embedSizes][2], hidden=o[:hiddenSizes][3], seed=o[:seed]),
-    LSTM(input=o[:hiddenSizes][3], hidden=o[:hiddenSizes][3], seed=o[:seed]),
+    LSTM(input=o[:embedSizes][2], hidden=o[:hiddenSizes][3], seed=o[:seed]) |> fgbias!,
+    LSTM(input=o[:hiddenSizes][3], hidden=o[:hiddenSizes][3], seed=o[:seed]) |> fgbias!,
     Dropout(p=o[:dropouts])
 )
 
@@ -224,7 +238,7 @@ function loss(M::MorseModel, d::SentenceBatch; v::Vocabulary)
     hiddens1 = M.contextEncoder(hiddens2[1]; training=true)
     # output encoder
     esize = size(M.outputEmbed.weight,1);
-    tagEmbeddings = [reshape(M.outputEncoder.dropout(M.outputEmbed(d.seqOutputs[i,first(range):last(range)+1])),esize,1,length(range)+1) for (i,range)=enumerate(d.tagRange)]
+    tagEmbeddings = [reshape(M.outputEncoder.dropout(M.outputEmbed(d.seqOutputs[i,range])),esize,1,length(range)) for (i,range)=enumerate(d.tagRange)]
     hiddens3 = M.outputEncoder(tagEmbeddings)
     # Decoder
     hiddens2 = hiddens2 .+ hiddens3
@@ -254,7 +268,7 @@ function predict(M::MorseModel, d::SentenceBatch; v::Vocabulary)
         for t=1:timeSteps
             rnninput = M.outputEmbed([input])
             if continueStoring && input == v.specialIndices.eow
-                push!(outEmbedding,rnninput); continueStoring = false
+                continueStoring = false
             elseif continueStoring && input ∉ v.specialIndices && length(v.tags[input]) > 1
                 push!(outEmbedding,rnninput)
             end
@@ -515,7 +529,7 @@ function loss(M::MorseDis, d::SentenceBatch; v::Vocabulary)
     hiddens1 = M.contextEncoder(hiddens2[1]; training=true)
     # output encoder
     esize = size(M.outputEmbed.weight,1);
-    tagEmbeddings = [reshape(M.outputEncoder.dropout(M.outputEmbed(d.seqOutputs[i,first(range):last(range)+1])),esize,1,length(range)+1) for (i,range)=enumerate(d.tagRange)]
+    tagEmbeddings = [reshape(M.outputEncoder.dropout(M.outputEmbed(d.seqOutputs[i,range])),esize,1,length(range)) for (i,range)=enumerate(d.tagRange)]
     hiddens3 = M.outputEncoder(tagEmbeddings)
     # Decoder
     hiddens2 = hiddens2 .+ hiddens3
@@ -550,7 +564,7 @@ function  predict(M::MorseDis, d::SentenceBatch; v::Vocabulary)
             input = v.specialIndices.bow
             outEmbedding = [];
             seq = [analysis.lemma; analysis.tags; v.specialIndices.eow]
-            tagRange = length(analysis.lemma)+1:length(seq)
+            tagRange = length(analysis.lemma)+1:length(seq)-1
 
             for o in seq
                 rnninput = M.outputEmbed([input])

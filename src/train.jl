@@ -92,14 +92,13 @@ function main(ARGS=[]; config = intro(ARGS))
     KnetLayers.settype!(ArrayType)
     KnetLayers.Knet.seed!(config[:seed])
 
-
     printConfig(logFile,config)
     printLog(logFile,"dataLengths (train,dev,test): ",length.(data))
     printLog(logFile,"vocabLengths", (chars=length(vocab.chars),
                                       tags=length(vocab.tags),
                                       comptags=length(vocab.comptags),
                                       words=length(vocab.words)))
-
+    
     if config[:mode] == 1 # train
         if  config[:modelFile] !== nothing
             model,o,_,_ = loadModel(config[:modelFile])
@@ -108,19 +107,29 @@ function main(ARGS=[]; config = intro(ARGS))
         else
             model = ModelType(config, vocab)
             setoptim!(model, eval(Meta.parse(config[:optimizer])))
-        end
-        trainmodel!(model, data, config, vocab, parser; logFile=logFile)
-
-        model=nothing; Knet.gc();
-
-        if isfile(config[:bestModel]*".jld2")
-            model,_,_,_ = loadModel(config[:bestModel]*".jld2")
-        end
-        
+        end 
     elseif config[:mode] == 2 # generate
         model,_,_,_ = loadModel(config[:modelFile])
     elseif config[:mode] == 3
         # transfer learning
+        model = ModelType(config, vocab)
+        setoptim!(model, eval(Meta.parse(config[:optimizer])))
+        if config[:sourceModel] !== nothing
+            source,_,sv,_ = loadModel(config[:modelFile])
+            transfer!(model,vocab,source,sv)
+            source=nothing; sv=nothing;
+        else
+            error("source model is not given")
+        end
+    end
+    Knet.gc();
+    #Train
+    if config[:mode] != 2
+        trainmodel!(model, data, config, vocab, parser; logFile=logFile)
+        model=nothing; Knet.gc();
+        if isfile(config[:bestModel]*".jld2")
+            model,_,_,_ = loadModel(config[:bestModel]*".jld2")
+        end
     end
 
     #Final Generation for Test

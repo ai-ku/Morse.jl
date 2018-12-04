@@ -26,20 +26,7 @@ abstract type Sequential <: Model;end;
 """
 abstract type Discriminative <: Model;end;
 
-#####
-##### Utils
-#####
-function fgbias!(l::LSTM)
-    for inputSource in ("i","h")
-        for layer in ("l1","l2")
-             gateparams = get(l.gatesview,string("b_",inputSource,"_f_",layer),nothing)
-             if gateparams !== nothing
-                  copyto!(gateparams,oftype(gateparams,0.5ones(length(gateparams))))
-             end
-        end
-    end
-    return l
-end
+
 #####
 ##### Primitives
 #####
@@ -606,3 +593,73 @@ function  predict(M::MorseDis, d::SentenceBatch; v::Vocabulary)
     end
     return PadSequenceArray(preds; pad=v.specialIndices.mask),total
 end
+
+#####
+##### Utils
+#####
+function fgbias!(m::LSTM)
+    for inputSource in ("i","h"), layer in ("l1","l2")
+        bias = get(m.gatesview, string("b_",inputSource,"_f_",layer), nothing)
+        if bias !== nothing
+            copyto!(bias,oftype(bias,0.5ones(length(bias))))
+        end
+    end
+    return m
+end
+
+function transfer!(target::Sequential, tv::Vocabulary, source::Sequential, sv::Vocabulary)
+    for f in (:wordEncoder, :decoder, :contextEncoder, :outputEmbed, :output)
+        if isdefined(target,f) && isdefined(source,f)
+            transfer!(getproperty(target,f), tv, getproperty(source,f), sv)
+        end
+    end
+end
+
+function transfer!(target::Embed, tv::Vocabulary, source::Embed, sv::Vocabulary)
+    transfer!(target.weight, tv.tags, source.weight, sv.tags; axis=2)
+end
+
+function transfer!(target::Linear, tv::Vocabulary, source::Linear, sv::Vocabulary)
+    transfer!(target.mult.weight, tv.tags, source.mult.weight, sv.tags; axis=1)
+    transfer!(target.bias, tv.tags, source.bias, sv.tags; axis=1)
+end
+
+function transfer!(target, tv::IndexedDict, source, sv::IndexedDict; axis=1)
+    for (k,i) in sv.toIndex
+        if (j=get(tv,k,nothing)) !== nothing
+            if ndims(target) == 2
+                if axis == 1
+                    target[j,:] = source[i,:]
+                else
+                    target[:,j] = source[:,i]
+                end
+            else
+                 target[j] = source[i]
+            end
+        end
+    end
+end
+
+function transfer!(source::Decoder, sv::Vocabulary, target::Decoder, tv::Vocabulary) 
+    transfer!(source.L1,target.L1)
+    transfer!(source.L2,target.L2)
+end
+
+function transfer!(source::ContextEncoder,sv::Vocabulary,target::ContextEncoder,tv::Vocabulary)
+    transfer!(source.encoder,target.encoder)
+    transfer!(source.reducer,target.reducer)
+end
+
+function transfer!(target::WordEncoder, tv::Vocabulary, source::WordEncoder, sv::Vocabulary)
+    transfer!(target.embed.weight, tv.chars, source.embed.weight, sv.chars; axis=2)
+    transfer!(target.encoder, source.encoder)
+end
+
+function transfer!(target::Linear, source::Linear) 
+    transfer!(target.mult,source.mult)
+    transfer!(target.bias,source.bias)
+end
+transfer!(target::Multiply, source::Multiply) = transfer!(target.weight,source.weight)
+transfer!(target::Dense, source::Dense) = transfer!(target.linear,source.linear)
+transfer!(target::LSTM, source::LSTM) = transfer!(target.params,source.params)
+transfer!(target::Param, source::Param) = copyto!(value(target),value(source))

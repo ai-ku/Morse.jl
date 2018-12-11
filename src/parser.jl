@@ -262,7 +262,7 @@ function Analysis(analysis::AbstractString, p::Parser{TRDataSet}; wLemma=true)
     elseif occursin(p.tagsSeperator^2,analysis) # ++ case
         lemma   = p.tagsSeperator
         isValid = true
-        tags    = String["Punc"]
+        tags = String[split(analysis,p.tagsSeperator^2)[2]]
     else
         tokens  = split(analysis,p.tagsSeperator)
         lemma   = popfirst!(tokens)

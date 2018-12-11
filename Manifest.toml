@@ -91,8 +91,8 @@ version = "1.1.1"
 
 [[KnetLayers]]
 deps = ["AutoGrad", "Knet", "Statistics"]
-git-tree-sha1 = "68b9f22b0dfe5e8fcfd63ac572f4edff4d0f1c31"
-repo-rev = "master"
+git-tree-sha1 = "460617b5a421bf13ec4034a751c9a6de19ff2dfa"
+repo-rev = "mutable"
 repo-url = "https://github.com/ekinakyurek/KnetLayers.jl"
 uuid = "80bfaf46-ad8a-11e8-19eb-a135e382307b"
 version = "0.1.0"

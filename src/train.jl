@@ -48,7 +48,7 @@ function intro(args)
     config[:genFile] = config[:genFile]*postfix
     config[:bestTestAcc] = config[:bestDevAcc] = 0.0
 
-    if isfile(config[:bestModel]) && config[:modelFile] === nothing
+    if isfile(config[:bestModel]*".jld2") && config[:modelFile] === nothing
         config[:modelFile] = config[:bestModel]*".jld2"
     end
 

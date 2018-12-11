@@ -55,7 +55,7 @@ function sequenceOutputBatch(analyses::Vector{EncodedAnalysis}, v::Vocabulary)
     maxoutlen = maximum(lengths)
     seqOutputs = fill(v.specialIndices.mask, length(analyses), maxoutlen)
     masks = ones(Int, length(analyses), maxoutlen)
-    for (k,a) in enumerate(analyses)
+    @inbounds for (k,a) in enumerate(analyses)
         seqOutputs[k,1:length(a.lemma)] .= a.lemma
         seqOutputs[k,tagRange[k]] .= a.tags
         seqOutputs[k,lengths[k]] = v.specialIndices.eow

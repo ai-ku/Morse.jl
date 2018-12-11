@@ -177,8 +177,14 @@ end
 
 # Vocabulary is needed for digit masking
 function getLabels(pred::StringAnalysis, gold::StringAnalysis; v::Vocabulary)
-    return (filter(!isdigit,pred.lemma) == filter(!isdigit,gold.lemma),
-            pred.tags == gold.tags)
+    if length(gold.lemma) != length(pred.lemma) 
+        return (false, pred.tags == gold.tags)
+    end
+    for (gc,pc) in zip(gold.lemma, pred.lemma)
+        isdigit(gc) && continue
+        gc != pc && return (false,pred.tags == gold.tags)
+    end
+    return (true, pred.tags == gold.tags)
 end
 
 function makeFormat(a::StringAnalysis, p::Parser{UDDataSet})
@@ -227,7 +233,7 @@ function evaluate(M::Model, data::Vector{SentenceBatch}, v::Vocabulary, p::Parse
                   '\n')
         end
 
-        for (i,encodedIO) in enumerate(d.encodedIOs)
+        @inbounds for (i,encodedIO) in enumerate(d.encodedIOs)
 
             analysis = encodedIO.analyses[1]  #correct analysis
 

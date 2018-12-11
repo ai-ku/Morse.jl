@@ -77,7 +77,7 @@ function (M::ContextEncoder)(hiddens; training=false)
     input = reshape(hiddens,size(hiddens,1),1,size(hiddens,2))
     y = M.encoder(M.dropout(input; enable=training)).y
     h = M.reducer(reshape(y,size(y,1),size(y,3)))
-    return h, similar(h) #TO-DO: zeros
+    return h, zero(value(h)) #TO-DO: zeros
 end
 
 """
@@ -108,15 +108,15 @@ end
 
 function (M::OutputEncoder)(tagEmbeddings::Vector)
     hos, cos = [], [];
-    H,B,_ = size(M.hidden) # assume one layer output encoder
+    H,_,_ = size(M.hidden) # assume one layer output encoder
     for i=1:length(tagEmbeddings)
-        ho, co = similar(M.hidden), similar(M.hidden) #TO-DO zeros
+        ho, co = zero(M.hidden), zero(M.hidden) #TO-DO zeros
         for j = max(i-M.previous,1):i-1
-             out = M.encoder(tagEmbeddings[j], ho, co; hy=true, cy=true)
+             out = M.encoder(M.dropout(tagEmbeddings[j],enable=true), ho, co; hy=true, cy=true)
              ho, co = out.hidden, out.memory
         end
-        push!(hos,reshape(ho,H,B))
-        push!(cos,reshape(co,H,B))
+        push!(hos,reshape(ho,H,1))
+        push!(cos,reshape(co,H,1))
     end
     return hcat(hos...), hcat(cos...)
 end
@@ -134,10 +134,10 @@ struct Decoder
 end
 
 function (M::Decoder)(input, hiddens1, hiddens2; training=false)
-    out1   = M.L1(M.dropout(input; enable=training), hiddens1...; hy=true, cy=true)
-    out2   = M.L2(M.dropout(out1.y; enable=training), hiddens2...; hy=true, cy=true)
-    return (M.dropout(out1.hidden; enable=training), out1.memory),
-            (M.dropout(out2.hidden; enable=training), out2.memory)
+    out1   = M.L1(M.dropout(input; enable=training), hiddens1...)
+    out2   = M.L2(M.dropout(out1.y; enable=training), hiddens2...)
+    return (out1.hidden, out1.memory),
+           (M.dropout(out2.hidden; enable=training), out2.memory)
 end
 
 Decoder(o::Dict,v::Vocabulary) = Decoder(
@@ -225,7 +225,7 @@ function loss(M::MorseModel, d::SentenceBatch; v::Vocabulary)
     hiddens1 = M.contextEncoder(hiddens2[1]; training=true)
     # output encoder
     esize = size(M.outputEmbed.weight,1);
-    tagEmbeddings = [reshape(M.outputEncoder.dropout(M.outputEmbed(d.seqOutputs[i,range])),esize,1,length(range)) for (i,range)=enumerate(d.tagRange)]
+    tagEmbeddings = [reshape(M.outputEmbed(d.seqOutputs[i,range]),esize,1,length(range)) for (i,range)=enumerate(d.tagRange)]
     hiddens3 = M.outputEncoder(tagEmbeddings)
     # Decoder
     hiddens2 = hiddens2 .+ hiddens3
@@ -241,7 +241,7 @@ function predict(M::MorseModel, d::SentenceBatch; v::Vocabulary)
     total = 0.0
     wordNumber, timeSteps = size(d.seqOutputs)
     preds = zeros(Int, wordNumber, timeSteps)
-    hiddens3  = (similar(M.outputEncoder.hidden), similar(M.outputEncoder.hidden))
+    hiddens3  = (zero(M.outputEncoder.hidden), zero(M.outputEncoder.hidden))
 
     outEmbeddings = [];
     for w=1:wordNumber
@@ -279,7 +279,7 @@ function predict(M::MorseModel, d::SentenceBatch; v::Vocabulary)
             end
 
             if length(outEmbeddings) > 0
-                hiddens3  = (similar(M.outputEncoder.hidden), similar(M.outputEncoder.hidden))
+                hiddens3  = (zero(M.outputEncoder.hidden), zero(M.outputEncoder.hidden))
                 for embs in outEmbeddings
                     hiddens3 = M.outputEncoder(embs, hiddens3[1], hiddens3[2])
                 end
@@ -516,7 +516,7 @@ function loss(M::MorseDis, d::SentenceBatch; v::Vocabulary)
     hiddens1 = M.contextEncoder(hiddens2[1]; training=true)
     # output encoder
     esize = size(M.outputEmbed.weight,1);
-    tagEmbeddings = [reshape(M.outputEncoder.dropout(M.outputEmbed(d.seqOutputs[i,range])),esize,1,length(range)) for (i,range)=enumerate(d.tagRange)]
+    tagEmbeddings = [reshape(M.outputEmbed(d.seqOutputs[i,range]),esize,1,length(range)) for (i,range)=enumerate(d.tagRange)]
     hiddens3 = M.outputEncoder(tagEmbeddings)
     # Decoder
     hiddens2 = hiddens2 .+ hiddens3
@@ -529,7 +529,7 @@ function  predict(M::MorseDis, d::SentenceBatch; v::Vocabulary)
     # Context Encoder
     hiddens1 = M.contextEncoder(hiddens2[1]; training=false)
     # Output Encoder
-    hiddens3  = (similar(M.outputEncoder.hidden), similar(M.outputEncoder.hidden))
+    hiddens3  = (zero(M.outputEncoder.hidden), zero(M.outputEncoder.hidden))
     # Decoder
 
     outEmbeddings = [];
@@ -584,7 +584,7 @@ function  predict(M::MorseDis, d::SentenceBatch; v::Vocabulary)
             end
 
             if length(outEmbeddings) > 0
-                hiddens3  = (similar(M.outputEncoder.hidden), similar(M.outputEncoder.hidden))
+                hiddens3  = (zero(M.outputEncoder.hidden), zero(M.outputEncoder.hidden))
                 for embs in outEmbeddings
                     hiddens3 = M.outputEncoder(embs, hiddens3[1], hiddens3[2])
                 end
@@ -598,8 +598,8 @@ end
 ##### Utils
 #####
 function fgbias!(m::LSTM)
-    for inputSource in ("i","h"), layer in ("l1","l2")
-        bias = get(m.gatesview, string("b_",inputSource,"_f_",layer), nothing)
+    for inputSource in (:i,:h), layer in (:10,:11)
+        bias = get(m.gatesview, Symbol(:b,inputSource,:f,layer), nothing)
         if bias !== nothing
             copyto!(bias,oftype(bias,0.5ones(length(bias))))
         end

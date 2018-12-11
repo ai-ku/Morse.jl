@@ -6,10 +6,9 @@
 #SBATCH --time=56:00:00
 #SBATCH --mem-per-cpu=32GB
 #SBATCH --cpus-per-task=1
-#SBATCH --nodelist=dy02
 #SBATCH --job-name="trmor2006_full"
 #SBATCH --output=trmor2006_full.out
 #SBATCH --error=trmor2006_full.error
 
-echo "julia main.jl --dataSet TRDataSet --version 2006 --epochs 100 --lemma --dropouts 0.3"
-/scratch/users/eakyurek13/julia-1.0.1/bin/julia main.jl --dataSet TRDataSet --version 2006 --epochs 100 --lemma --dropouts 0.3
+echo "julia main.jl --dataSet TRDataSet --version 2006 --epochs 100 --lemma --dropouts 0.3 --patiance 6"
+julia main.jl --dataSet TRDataSet --version 2006 --epochs 100 --lemma --dropouts 0.3 --patiance 6

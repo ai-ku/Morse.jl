@@ -33,14 +33,11 @@ Note: coming very soon
 
 ## Experiments
 
-To verify the results presented in the paper, you may run the scripts to train models an ablations. During training logs will be created at `logs/` folder.
+To verify the results presented in the paper, you may run the scripts to train models an ablations. During training logs will be created at [logs/](logs/) folder.
+
+Detailed information about experiments can be found in [scripts/](scripts/README.md)
 
 Note: Nvidia GPU is required to train on a reasonable time.
-
-```Shell
-   cd scripts/
-   sh experiment-you-want.sh
-```
 
 ## Customized Training
 

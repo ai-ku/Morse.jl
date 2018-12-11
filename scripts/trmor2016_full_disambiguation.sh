@@ -10,5 +10,5 @@
 #SBATCH --output=trmor2006_full_dis.out
 #SBATCH --error=trmor2006_full_dis.error
 
-echo "julia main.jl --dataSet TRDataSet --version 2006 --epochs 100 --lemma --dropouts 0.3 --modelType MorseDis"
-julia main.jl --dataSet TRDataSet --version 2006 --epochs 100 --lemma --dropouts 0.3 --modelType MorseDis
+echo "julia main.jl --dataSet TRDataSet --version 2016 --epochs 100 --lemma --dropouts 0.3 --modelType MorseDis"
+julia main.jl --dataSet TRDataSet --version 2016 --epochs 100 --lemma --dropouts 0.3 --modelType MorseDis

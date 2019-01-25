@@ -601,7 +601,7 @@ function fgbias!(m::LSTM)
     for inputSource in (:i,:h), layer in (:10,:11)
         bias = get(m.gatesview, Symbol(:b,inputSource,:f,layer), nothing)
         if bias !== nothing
-            copyto!(bias,oftype(bias,0.5ones(length(bias))))
+            bias .= 0.5
         end
     end
     return m

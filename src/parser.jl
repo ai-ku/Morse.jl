@@ -1,4 +1,4 @@
-import Base: getindex, get, length
+import KnetLayers: IndexedDict
 
 #####
 ##### Helper Functions for Base
@@ -14,39 +14,6 @@ import Base: getindex, get, length
 TRtoLower(x::Char) = x=='I' ? 'ı' : lowercase(x);
 TRtoLower(s::AbstractString) = map(TRtoLower,s)
 
-"""
-    IndexedDict{T}
-    IndexedDict(toIndex::Dict{T,Int}) where T
-    IndexedDict(toElement::Vector{T}) where T
-
-    length(d::IndexedDict)
-    getindex(d::IndexedDict,inds...)::T
-    get(d::IndexedDict,v,default)::Int
-
-    IndexedDict is helper dictionary format for creating vocabularies.
-    Vocabularies maps words,chars,tags to their index in the vocabulary,
-    and maps indicies to t
-"""
-struct IndexedDict{T}
-     toIndex::Dict{T,Int};
-     toElement::Vector{T};
-end
-
-function IndexedDict(toIndex::Dict{T,Int}) where T
-    toElement=Vector{T}(undef,length(toIndex))
-    for (k,v) in toIndex; toElement[v]=k; end
-    IndexedDict{T}(toIndex,toElement)
-end
-
-function IndexedDict(toElement::Vector{T}) where T
-    toIndex=Dict{T,Int}()
-    for (k,v) in enumerate(toElement); toIndex[v]=k; end
-    IndexedDict{T}(toIndex,toElement)
-end
-
-get(d::IndexedDict,v,default) = get(d.toIndex,v,default)
-length(d::IndexedDict) = length(d.toElement)
-getindex(d::IndexedDict,inds...) = getindex(d.toElement,inds...)
 
 #####
 ##### IO and Vocabulary
@@ -260,7 +227,7 @@ function Analysis(analysis::AbstractString, p::Parser{TRDataSet}; wLemma=true)
         isValid = false
         tags    = String[specialTokens.unk]
     elseif occursin(p.tagsSeperator^2,analysis) # ++ case
-        lemma   = p.tagsSeperator
+        lemma   = string(p.tagsSeperator)
         isValid = true
         tags = String[split(analysis,p.tagsSeperator^2)[2]]
     else
@@ -275,7 +242,7 @@ function Analysis(analysis::AbstractString, p::Parser{TRDataSet}; wLemma=true)
                 push!(tags, tag)
             end
         end
-    end
+    end    
     lemmaOut = wLemma ? collect(TRtoLower(lemma)) : Char[]
     return Analysis(lemmaOut, tags, isValid)
 end

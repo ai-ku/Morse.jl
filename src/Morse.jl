@@ -1,7 +1,7 @@
 module Morse
 
 using KnetLayers, ArgParse, Random
-import KnetLayers: _pack_sequence, Knet.save, Knet.load
+import KnetLayers: _pack_sequence
 
 dir(path...) = joinpath(dirname(@__DIR__),path...)
 

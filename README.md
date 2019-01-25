@@ -11,12 +11,12 @@ Furthermore, Morse provides pre-trained models which are trained in [Universal D
 and in [TrMor](https://github.com/ai-ku/TrMor2018) datasets, so you can tag your sentences immediately.
 
 ## Dependencies
-  - Julia 1.0
+  - Julia 1.1
   - Network connection
 
 ## Setup and Data(optional)
 ```Shell
-  git clone https://github.com/ekinakyurek/Morse.jl
+  git clone https://github.com/ai-ku/Morse.jl
   cd Morse.jl
   julia instantiate.jl
 ```

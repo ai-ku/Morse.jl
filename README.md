@@ -14,7 +14,7 @@ and in [TrMor](https://github.com/ai-ku/TrMor2018) datasets, so you can tag your
   - Julia 1.1
   - Network connection
 
-## Install
+## Installation
 
 ### For User
 ```JULIA
@@ -31,7 +31,7 @@ and in [TrMor](https://github.com/ai-ku/TrMor2018) datasets, so you can tag your
    cd Morse.jl
 ```
 * #### Setup (Optional)
-Note: It is optional because running experiments automatically setup the environment and install required data if needed. However, if you didn't run any experiment and want to work on REPL immediately you need to instantiate and download datasets.
+Note: It is optional because running an experiment automatically setups the environment and installs required data (if needed). However, if you didn't run any experiment and want to work on REPL immediately, you need to instantiate and download datasets.
 ```JULIA
    (v1.1) pkg> activate .
    (v1.1) Morse> instantiate

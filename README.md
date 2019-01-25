@@ -14,21 +14,34 @@ and in [TrMor](https://github.com/ai-ku/TrMor2018) datasets, so you can tag your
   - Julia 1.1
   - Network connection
 
-## Setup and Data(optional)
-```Shell
-  git clone https://github.com/ai-ku/Morse.jl
-  cd Morse.jl
-  julia instantiate.jl
+## Install
+
+### For User
+```JULIA
+   (v1.1) pkg> add https://github.com/ai-ku/Morse.jl
 ```
-## Tagging
+### For Developer
+```JULIA
+   (v1.1) pkg> dev https://github.com/ai-ku/Morse.jl
+```
+### For Exact Replication
 
-Note: coming very soon
+```SHELL
+   git clone https://github.com/ai-ku/Morse.jl
+   cd Morse.jl
+```
+* #### Setup (Optional)
+Note: It is optional because running experiments automatically setup the environment and install required data if needed. However, if you didn't run any experiment and want to work on REPL immediately you need to instantiate and download datasets.
+```JULIA
+   (v1.1) pkg> activate .
+   (v1.1) Morse> instantiate
+```
 
-```Julia
-   (v1.0) pkg> activate .
+* #### Data (Optional)
+```JULIA
    julia> using Morse
-   julia> model = download(MorseModel, format=UDDataSet, lang="en")
-   julia> model("I have no purpose but to make others' lives easier.")
+   julia> download(TRDataSet)
+   julia> download(UDDataSet)
 ```
 
 ## Experiments
@@ -39,12 +52,21 @@ Detailed information about experiments can be found in [scripts/](scripts/README
 
 Note: Nvidia GPU is required to train on a reasonable time.
 
+## Tagging
+
+Note: coming very soon...
+
+```Julia
+   julia> using Morse
+   julia> model = download(MorseModel, format=UDDataSet, lang="en")
+   julia> model("I have no purpose but to make others' lives easier.")
+```
+
 ## Customized Training
 
 Note: Nvidia GPU is required to train on a reasonable time.
 
 ```Julia
-   (v1.0) pkg> activate .
    julia> using Morse
    julia> config = Morse.intro([]) # default configuration but you can modify
    julia> config[:logFile] = nothing # to print stdout.

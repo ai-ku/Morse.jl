@@ -172,7 +172,7 @@ end
 # Discriminative
 function StringAnalysis(word::Vector{Int}, output::Int; v::Vocabulary, isgold=false)
     StringAnalysis(join(v.chars[word]), "",
-                   push!(split(v.comptags[output],'|'),v.specialIndices.eow))
+                   push!(split(v.comptags[output],'|'),v.specialTokens.eow))
 end
 
 # Vocabulary is needed for digit masking
@@ -242,7 +242,7 @@ function evaluate(M::Model, data::Vector{SentenceBatch}, v::Vocabulary, p::Parse
                 gold  = StringAnalysis(encodedIO.chars, d.seqOutputs[i,:], v=v, isgold=true)
             else
                 pred  = StringAnalysis(encodedIO.chars, preds[i], v=v)
-                gold  = StringAnalysis(encodedIO.chars, d.completeOutputs[i], v=v, isgold=true)
+                gold  = StringAnalysis(encodedIO.chars, d.compositeOutputs[i], v=v, isgold=true)
             end
 
             tf = getLabels(gold, pred, v=v) #(lemma::Bool, tag::Bool, complete::Bool)

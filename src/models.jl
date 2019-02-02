@@ -391,7 +391,7 @@ function loss(M::Classifier, d::SentenceBatch; v::Vocabulary)
     hiddens2 = M.wordEncoder(d.seqInputs, d.seqSizes, d.unsortingIndices; training=true)
     hiddens1 = M.contextEncoder(hiddens2[1]; training=true)
     scores = M.output(vcat(hiddens1[1],hiddens2[1]))
-    M.loss(scores,d.completeOutputs)
+    M.loss(scores,d.compositeOutputs)
 end
 
 function predict(M::Classifier, d::SentenceBatch; v::Vocabulary)
@@ -399,7 +399,7 @@ function predict(M::Classifier, d::SentenceBatch; v::Vocabulary)
     hiddens1 = M.contextEncoder(hiddens2[1]; training=true)
     scores   = M.output(vcat(hiddens1[1],hiddens2[1]))
     preds    = vec(getindex.(argmax(convert(Array,scores),dims=1),1))
-    loss     = M.loss(scores,d.completeOutputs)
+    loss     = M.loss(scores,d.compositeOutputs)
     return preds,loss
 end
 

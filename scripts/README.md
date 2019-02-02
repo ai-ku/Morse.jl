@@ -43,7 +43,7 @@
 ```
 
 ## Table 8: High-resource languages
-Note: if you run below for Table 7, you don't need to run hem again.
+Note: If you've already run some experiments in below for Table 7, you **don't need to run** them again.
 
 ```shell
     sh high_resource_da.sh
@@ -53,7 +53,7 @@ Note: if you run below for Table 7, you don't need to run hem again.
 ```
 
 ## Table 9: Ablation experiments
-Note: If you run some experiments in below for Table 5, you don't need to run hem again.
+Note: If you've already run some experiments in below for Table 5, you **don't need to run** them again.
 
 ```shell
     sh trmor2018_full.sh
@@ -62,7 +62,7 @@ Note: If you run some experiments in below for Table 5, you don't need to run he
 ```
 
 ## Table 10: Decoder Experiments
-Note: if you run below for Table 7, you don't need to run hem again.
+Note: If you've already run some experiments in below for Table 7, you **don't need to run them** again.
 ### Seq
 ```shell
     sh high_resource_da.sh
@@ -74,6 +74,6 @@ Note: if you run below for Table 7, you don't need to run hem again.
 ```shell
     sh high_resource_da_classifier.sh
     sh high_resource_es_classifier.sh
-    sh high_resource_fi_classifer.sh
-    sh high_resource_ru_classifer.sh
+    sh high_resource_fi_classifier.sh
+    sh high_resource_ru_classifier.sh
 ```

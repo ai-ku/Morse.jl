@@ -8,5 +8,5 @@
 #SBATCH --output=trmor2016_full.out
 #SBATCH --error=trmor2016_full.error
 
-echo "julia main.jl --dataSet TRDataSet --version 2016 --epochs 100 --lemma --dropouts 0.3 --modelType S2S"
-julia main.jl --dataSet TRDataSet --version 2016 --epochs 100 --lemma --dropouts 0.3 --modelType S2S
+echo "julia main.jl --dataSet TRDataSet --version 2018 --epochs 100 --lemma --dropouts 0.3 --modelType S2S"
+julia main.jl --dataSet TRDataSet --version 2018 --epochs 100 --lemma --dropouts 0.3 --modelType S2S

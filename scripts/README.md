@@ -62,7 +62,7 @@ Note: If you've already run some experiments in below for Table 5, you **don't n
 ```
 
 ## Table 10: Decoder Experiments
-Note: If you've already run some experiments in below for Table 7, you **don't need to run them** again.
+Note: If you've already run some experiments in below for Table 7, you **don't need to run** them again.
 ### Seq
 ```shell
     sh high_resource_da.sh

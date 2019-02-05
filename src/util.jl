@@ -190,7 +190,7 @@ end
 function makeFormat(a::StringAnalysis, p::Parser{UDDataSet})
     lemma = length(a.lemma) == 0 ? "X" : join(a.lemma)
     tags = a.tags[1:end-1]
-    posTag = length(tags) == 1 ? "X" : tags[1]
+    posTag = length(tags) == 0 ? "X" : tags[1]
     morphFeats = length(tags) < 2 ? p.unkToken : join(tags[2:end],p.tagsSeperator)
     return (a.word, lemma, posTag, morphFeats)
 end

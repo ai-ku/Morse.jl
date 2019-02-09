@@ -58,7 +58,7 @@ Note: coming very soon...
 
 ```Julia
    julia> using Morse
-   julia> model = download(MorseModel, format=UDDataSet, lang="en")
+   julia> model = download(MorseModel, format=TRDataSet, lang="tr")
    julia> model("Annem sana yardım edemez .")
    <S> 
    anne+Noun+A3sg+P1sg+Nom

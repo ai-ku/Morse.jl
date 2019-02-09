@@ -59,7 +59,14 @@ Note: coming very soon...
 ```Julia
    julia> using Morse
    julia> model = download(MorseModel, format=UDDataSet, lang="en")
-   julia> model("I have no purpose but to make others' lives easier.")
+   julia> model("Annem sana yardım edemez .")
+   <S> 
+   anne+Noun+A3sg+P1sg+Nom
+   sen+Pron+Pers+A2sg+Pnon+Dat
+   yardım+Noun+A3sg+Pnon+Nom
+   et+Verb^DB+Verb+Able+Neg+Aor+A3sg
+   .+Punct
+   </S>
 ```
 
 ## Customized Training

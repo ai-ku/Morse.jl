@@ -69,6 +69,7 @@ struct EncodedAnalysis
     isValid::Bool
 end
 
+EncodedAnalysis(mask::Int, len::Int) = EncodedAnalysis(fill(mask,len), fill(mask,len), mask, true)
 EncodedAnalysis(a::Analysis; v::Vocabulary) =
 EncodedAnalysis(map(x->get(v.tags, string(x), v.specialIndices.unk)::Int, a.lemma),
                 map(x->get(v.tags, x, v.specialIndices.unk)::Int, a.tags),
@@ -107,6 +108,13 @@ struct EncodedIO
     completeWord::Int
     isAmbigous::Bool
 end
+
+#Empty Outputs
+EncodedIO(chars::Vector{Char}; v::Vocabulary, mask=1,len=20) =
+    EncodedIO(map(x->get(v.chars, x, v.specialIndices.unk)::Int, chars),
+              [EncodedAnalysis(v.specialIndices.unk,len)],
+              get(v.words, join(chars), v.specialIndices.unk),
+              false)
 
 EncodedIO(a::ParsedIO; v::Vocabulary) =
     EncodedIO(map(x->get(v.chars, x, v.specialIndices.unk)::Int, a.chars),

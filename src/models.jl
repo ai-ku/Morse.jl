@@ -1,3 +1,4 @@
+import KnetLayers: _batchSizes2indices, _pack_sequence, arrtype
 #####
 ##### Abstract Type Definitions
 #####
@@ -17,6 +18,20 @@ abstract type Model;end;
     see `subtypes(Sequential)`
 """
 abstract type Sequential <: Model;end;
+
+function predict(M::Model, sentence::String; v::Vocabulary, p::Parser, maxL=20)
+    encoded_ios = map(w->EncodedIO(collect(w),v=v,mask=v.specialTokens.unk,len=maxL), split(sentence))
+    d = miniBatch(encoded_ios, v)
+    preds,_ = predict(M, d; v=v)
+    return map(enumerate(d.encodedIOs)) do (i,encodedIO)
+        if isa(M,Sequential)
+           @inbounds pred  = StringAnalysis(encodedIO.chars, preds[i,:], v=v)
+        else
+           @inbounds pred  = StringAnalysis(encodedIO.chars, preds[i], v=v)
+        end
+        makeFormat(pred,p)
+    end
+end
 
 """
     Discriminative <: Model
@@ -50,9 +65,24 @@ WordEncoder(o::Dict,v::Vocabulary) = WordEncoder(
     LSTM(input=o[:embedSizes][1], hidden=o[:hiddenSizes][1], seed=o[:seed]) |> fgbias!
 )
 
+# function (M::WordEncoder)(inputs::Vector{Int}, sizes::Vector{Int}, indices::Vector{Int}; training=false)
+#     out = M.encoder(M.dropout(M.embed(inputs), enable=training), batchSizes=sizes, hy=true, cy=true)
+#     return out.hidden[:,:,end][:,indices], out.memory[:,:,end][:,indices]
+# end
+
 function (M::WordEncoder)(inputs::Vector{Int}, sizes::Vector{Int}, indices::Vector{Int}; training=false)
-    out = M.encoder(M.dropout(M.embed(inputs), enable=training), batchSizes=sizes, hy=true, cy=true)
-    return out.hidden[:,:,end][:,indices], out.memory[:,:,end][:,indices]
+    if value(M.encoder.params) isa KnetArray
+        out = M.encoder(M.dropout(M.embed(inputs), enable=training), batchSizes=sizes, hy=true, cy=true)
+        return out.hidden[:,:,end][:,indices], out.memory[:,:,end][:,indices]
+    else
+        hs=[]; cs=[];
+        for ind in _batchSizes2indices(sizes)
+            out = M.encoder(reshape(M.embed(inputs[ind]),size(M.embed.weight,1),1,length(ind)); hy=true, cy=true)
+            push!(hs, reshape(out.hidden,size(out.hidden,1),1))
+            push!(cs, reshape(out.memory,size(out.memory,1),1))
+        end
+        return hcat(hs[indices]...), hcat(cs[indices]...)
+    end
 end
 
 """
@@ -98,7 +128,7 @@ OutputEncoder(o::Dict,v::Vocabulary) = OutputEncoder(
     LSTM(input=o[:embedSizes][2], hidden=o[:hiddenSizes][4], seed=o[:seed]) |> fgbias!,
     Dropout(p=o[:dropouts]),
     o[:previous],
-    KnetLayers.arrtype(zeros(o[:hiddenSizes][4],1,1))
+    arrtype(zeros(o[:hiddenSizes][4],1,1))
 )
 
 function (M::OutputEncoder)(emb, h, c)
@@ -289,6 +319,8 @@ function predict(M::MorseModel, d::SentenceBatch; v::Vocabulary)
     return preds, total
 end
 
+(M::MorseModel)(sentence::String; v::Vocabulary,p::Parser, maxL=20) = predict(M,sentence;v=v,p=p,maxL=maxL)
+
 """
     S2S <: Sequential
     S2S(o::Dict,v::Vocabulary)
@@ -323,6 +355,7 @@ function predict(M::S2S, d::SentenceBatch; v::Vocabulary)
     recurrentPredict(M, d, (nothing, nothing), hiddens2; startIndex=v.specialIndices.bow)
 end
 
+(M::S2S)(sentence::String; v::Vocabulary,p::Parser, maxL=20) = predict(M,sentence;v=v,p=p,maxL=maxL)
 """
     S2SContext <: Sequential
     S2SContext(config::Dict,v::Vocabulary)
@@ -361,6 +394,7 @@ function predict(M::S2SContext, d::SentenceBatch; v::Vocabulary)
     recurrentPredict(M, d, hiddens1, hiddens2; startIndex=v.specialIndices.bow)
 end
 
+(M::S2SContext)(sentence::String; v::Vocabulary,p::Parser, maxL=20) = predict(M,sentence;v=v,p=p,maxL=maxL)
 #####
 ##### Discriminative Models
 #####
@@ -403,6 +437,7 @@ function predict(M::Classifier, d::SentenceBatch; v::Vocabulary)
     return preds,loss
 end
 
+(M::Classifier)(sentence::String; v::Vocabulary,p::Parser, maxL=20) = predict(M,sentence;v=v,p=p,maxL=maxL)
 #####
 ##### Disambiguator Models
 #####

@@ -50,6 +50,25 @@ function download(dataset::Type{TRDataSet}; path=dir("data","TrMor2018"))
     end
 end
 
+const server_url ="ai.ku.edu.tr/models/morse/"
+
+function download(model::Type{T}, format::Type{TRDataSet}; vers="2018", lemma=true, lang="tr") where T
+    flang = format===TRDataSet ? string("TR-tr",vers) : string("UD-",lang)
+    mname = string(T,"_lemma_",lemma,"_lang_",flang,"_size_full",".jld2")
+    lpath = dir("checkpoints",mname)
+    if !isfile(lpath)
+        mpath = string(server_url, mname)
+        download(mpath,lpath)
+    end
+    lpath
+end
+
+function trained(x...;o...)
+    lpath = download(x...;o...)
+    model,_,vocabulary,parser = loadModel(lpath)
+    return model,vocabulary,parser
+end
+
 """
     loadModel(fname::AbstractString)
 
@@ -177,7 +196,7 @@ end
 
 # Vocabulary is needed for digit masking
 function getLabels(pred::StringAnalysis, gold::StringAnalysis; v::Vocabulary)
-    if length(gold.lemma) != length(pred.lemma) 
+    if length(gold.lemma) != length(pred.lemma)
         return (false, pred.tags == gold.tags)
     end
     for (gc,pc) in zip(gold.lemma, pred.lemma)
@@ -194,6 +213,9 @@ function makeFormat(a::StringAnalysis, p::Parser{UDDataSet})
     morphFeats = length(tags) < 2 ? p.unkToken : join(tags[2:end],p.tagsSeperator)
     return (a.word, lemma, posTag, morphFeats)
 end
+
+printFormat(predS,parser; f=stdout) =
+    for (i,pred) in enumerate(predS) printFormat(f,i,pred,parser) end
 
 function printFormat(f::IO, i::Integer, predStr::NTuple, p::Parser{UDDataSet})
     word, lemma, pos_tag, morph_feats = predStr

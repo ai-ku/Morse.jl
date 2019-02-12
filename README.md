@@ -54,19 +54,17 @@ Note: Nvidia GPU is required to train on a reasonable time.
 
 ## Tagging
 
-Note: coming very soon...
+Note: Limited Support
 
 ```Julia
-   julia> using Morse
-   julia> model = download(MorseModel, format=TRDataSet, lang="tr")
-   julia> model("Annem sana yardım edemez .")
-   <S> 
-   anne+Noun+A3sg+P1sg+Nom
-   sen+Pron+Pers+A2sg+Pnon+Dat
-   yardım+Noun+A3sg+Pnon+Nom
-   et+Verb^DB+Verb+Able+Neg+Aor+A3sg
-   .+Punct
-   </S>
+   julia> using Knet, KnetLayers, Morse
+   julia> model, vocabulary, parser = trained(MorseModel, TRDataSet, vers="2018")
+   julia> predictions = model("Annem sana yardım edemez .", v=vocabulary, p=parser)
+   annem anne+Noun+A3sg+P1sg+Nom
+   sana sen+Pron+Pers+A2sg+Pnon+Dat
+   yardım yardım+Noun+A3sg+Pnon+Nom
+   edemez et+Verb^DB+Verb+Able+Neg+Aor+A3sg
+   . .+Punct
 ```
 
 ## Customized Training

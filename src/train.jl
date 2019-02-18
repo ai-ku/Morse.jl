@@ -115,7 +115,8 @@ function main(ARGS=[]; config = intro(ARGS))
         model = ModelType(config, vocab)
         setoptim!(model, eval(Meta.parse(config[:optimizer])))
         if config[:sourceModel] !== nothing
-            source,_,sv,_ = loadModel(config[:modelFile])
+	    !isfile(config[:sourceModel]) && error("couldn't found sourceModel in its location!")
+            source,_,sv,_ = loadModel(config[:sourceModel])
             transfer!(model,vocab,source,sv)
             source=nothing; sv=nothing;
         else

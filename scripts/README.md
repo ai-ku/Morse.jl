@@ -62,18 +62,17 @@ Note: If you've already run some experiments in below for Table 5, you **don't n
 ```
 
 ## Table 10: Decoder Experiments
-Note: If you've already run some experiments in below for Table 7, you **don't need to run** them again.
 ### Seq
 ```shell
-    sh high_resource_da.sh
-    sh high_resource_es.sh
-    sh high_resource_fi.sh
-    sh high_resource_ru.sh
+    sh low_resource_sv.sh
+    sh low_resource_pt.sh
+    sh low_resource_hu.sh
+    sh low_resource_bg.sh
 ```
 #### Tag
 ```shell
-    sh high_resource_da_classifier.sh
-    sh high_resource_es_classifier.sh
-    sh high_resource_fi_classifier.sh
-    sh high_resource_ru_classifier.sh
+    sh low_resource_sv_classifier.sh
+    sh low_resource_pt_classifier.sh
+    sh low_resource_hu_classifier.sh
+    sh low_resource_bg_classifier.sh
 ```

@@ -198,11 +198,16 @@ struct Parser{MyDataSet}
     tagValueSeperator::NString
 end
 
-Parser{UDDataSet}(v=21) =
+Parser{UDDataSet}(v) =
     Parser{UDDataSet}("# text", " ", '\t', '|', ["#"],"_", nothing, "=")
 
-Parser{TRDataSet}(v=2018) =
-    Parser{TRDataSet}("<S", "</S", (v==2018 ? '\t' : ' '), '+', ["<"], "*UNKNOWN*", "^DB", nothing)
+Parser{TRDataSet}(v::Val{2018}) =
+    Parser{TRDataSet}("<S", "</S", '\t', '+', ["<"], "?", "^DB", nothing) # "*UNKNOWN*" => "?"
+
+Parser{TRDataSet}(v::Val{2016}) =
+    Parser{TRDataSet}("<S", "</S", '\t', '+', ["<"], "*UNKNOWN*", "^DB", nothing)  # ' ' => '\t'
+
+Parser{TRDataSet}(v::Val{2006}) = Parser{TRDataSet}(Val(2016))
 
 """
      parseDataLine(line::AbstractString, p::Parser{<:MyDataSet}; wLemma=true, parseAll)
@@ -236,6 +241,7 @@ function Analysis(analysis::AbstractString, p::Parser{TRDataSet}; wLemma=true)
         isValid	= true
         tags    = String[]
         for tag in tokens
+            tag == "Prop" && continue # don't consider proper name tags
             if endswith(tag, p.dbToken)
                 push!(tags, tag[1:end-length(p.dbToken)], p.dbToken)
             else

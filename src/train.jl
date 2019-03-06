@@ -98,7 +98,7 @@ function main(ARGS=[]; config = intro(ARGS))
                                       tags=length(vocab.tags),
                                       comptags=length(vocab.comptags),
                                       words=length(vocab.words)))
-    
+
     if config[:mode] == 1 # train
         if  config[:modelFile] !== nothing
             model,o,_,_ = loadModel(config[:modelFile])
@@ -107,7 +107,7 @@ function main(ARGS=[]; config = intro(ARGS))
         else
             model = ModelType(config, vocab)
             setoptim!(model, eval(Meta.parse(config[:optimizer])))
-        end 
+        end
     elseif config[:mode] == 2 # generate
         model,_,_,_ = loadModel(config[:modelFile])
     elseif config[:mode] == 3

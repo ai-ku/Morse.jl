@@ -109,7 +109,14 @@ function main(ARGS=[]; config = intro(ARGS))
             setoptim!(model, eval(Meta.parse(config[:optimizer])))
         end
     elseif config[:mode] == 2 # generate
-        model,_,_,_ = loadModel(config[:modelFile])
+	source,_,sv,_ = loadModel(config[:modelFile])
+        if isa(source,ModelType)
+            model = source
+        else
+            model = ModelType(config, vocab)
+            transfer!(model,vocab,source,sv)
+        end
+	source=nothing; sv=nothing;
     elseif config[:mode] == 3
         # transfer learning
         model = ModelType(config, vocab)
@@ -163,7 +170,6 @@ function trainmodel!(M::Model, data::Vector, o::Dict{Symbol,Any}, v::Vocabulary,
                             p::Parser; logFile::IO=stdout, patiance=o[:patiance])
     for i=1:o[:epochs]
         trnloss = trainepoch!(M, data[1], v; wordLimit=o[:wordLimit])
-
         printLog(logFile, "epoch=$i | set=Train | scores: ", (loss=trnloss[1]/trnloss[2],))
         for (k,set) in enumerate((:Dev,:Test))
             scores = evaluate(M, data[k+1], v, p, file=nothing)

@@ -45,7 +45,7 @@ end
 function download(dataset::Type{TRDataSet}; path=dir("data","TrMor2018"))
     if !isdir(path)
         repo = LibGit2.clone("https://github.com/ai-ku/TrMor2018", path)
-        LibGit2.checkout!(repo,"a0675804beea74e45e9faeac7132070655fca828")
+        LibGit2.checkout!(repo,"2b50593e756b36ba7fc3f8b16a9f9f92589710fc")
         run(`ln -s  $(joinpath(path,"TrMor2006","trmor2006.train")) $(joinpath(path,"TrMor2016","trmor2016.train"))`)
     end
 end
@@ -138,7 +138,7 @@ end
 """
 function prepareData(files::Vector{<:AbstractString}, dtype::Type{<:DataSet};
                      vers=2018, seed=31, tsize=typemax(Int), withLemma=true, parseAll=false)
-    parser = Parser{dtype}(vers)
+    parser = Parser{dtype}(Val(vers))
     data = createsplits(parseFile.(files; p=parser, withLemma=withLemma, parseAll=parseAll), seed, tsize)
     vocab = Vocabulary(data)
     return encode.(data, v=vocab), vocab, parser

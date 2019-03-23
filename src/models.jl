@@ -357,7 +357,7 @@ end
 
 function predict(M::S2SContext, d::SentenceBatch; v::Vocabulary)
     hiddens2 = M.wordEncoder(d.seqInputs, d.seqSizes, d.unsortingIndices; training=false)
-    hiddens1 = M.contextEncoder(hiddens2[1]; training=true)
+    hiddens1 = M.contextEncoder(hiddens2[1]; training=false)
     recurrentPredict(M, d, hiddens1, hiddens2; startIndex=v.specialIndices.bow)
 end
 
@@ -396,7 +396,7 @@ end
 
 function predict(M::Classifier, d::SentenceBatch; v::Vocabulary)
     hiddens2 = M.wordEncoder(d.seqInputs, d.seqSizes, d.unsortingIndices; training=false)
-    hiddens1 = M.contextEncoder(hiddens2[1]; training=true)
+    hiddens1 = M.contextEncoder(hiddens2[1]; training=false)
     scores   = M.output(vcat(hiddens1[1],hiddens2[1]))
     preds    = vec(getindex.(argmax(convert(Array,scores),dims=1),1))
     loss     = M.loss(scores,d.compositeOutputs)

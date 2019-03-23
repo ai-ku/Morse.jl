@@ -72,7 +72,7 @@ end
 EncodedAnalysis(a::Analysis; v::Vocabulary) =
 EncodedAnalysis(map(x->get(v.tags, string(x), v.specialIndices.unk)::Int, a.lemma),
                 map(x->get(v.tags, x, v.specialIndices.unk)::Int, a.tags),
-                get(v.comptags, join(a.tags,'|'), v.specialIndices.unk),
+                get(v.comptags, join(a.tags,'+'), v.specialIndices.unk),
                 a.isValid)
 
 """
@@ -124,7 +124,7 @@ function Vocabulary(sets::Vector)
     char2ix, tag2ix, word2ix, ctag2ix=CharDict(), StrDict(), StrDict(), StrDict()
 
     for (i,T) in enumerate(specialTokens)
-        get!(tag2ix,T,i); get!(word2ix,T,i); get!(word2ix,T,i)
+        get!(tag2ix,T,i); get!(word2ix,T,i); get!(ctag2ix,T,i)
         get!(char2ix,T[1],i);
     end
     specialIndicies = (unk=1, mask=2, eow=3, bow=4)

@@ -199,7 +199,7 @@ function printFormat(f::IO, i::Integer, predStr::NTuple, p::Parser{UDDataSet})
     word, lemma, pos_tag, morph_feats = predStr
     s,u = p.partsSeperator, p.unkToken
     if startswith(pos_tag,"Upos=")
-        pos_tag = String(SubString(pos_tag,6:length(pos_tag)))
+        pos_tag = SubString(pos_tag,6:length(pos_tag))
     end
     write(f,string(i),s,word,s,lemma,s,pos_tag,s,u,s,morph_feats,s,u,s,u,s,u,s,u,'\n')
 end
@@ -263,9 +263,9 @@ function evaluate(M::Model, data::Vector{SentenceBatch}, v::Vocabulary, p::Parse
             #Generation
             file !== nothing && printFormat(file, i, makeFormat(pred, p), p)
         end
-        T == UDDataSet && file !== nothing && print(file,'\n')
+        T === UDDataSet && file !== nothing && print(file,'\n')
     end
-   T == UDDataSet && file !== nothing && print(file,"# text = _end_")
+   T === UDDataSet && file !== nothing && print(file,"# text = _end_")
    f1macro, f1micro = F1average(F1.precision, F1.recall)
    return (loss=loss[1]/loss[2], accuracies=percentage(acc), amb=percentage(amb),
             f1macro=f1macro, f1micro=f1micro)

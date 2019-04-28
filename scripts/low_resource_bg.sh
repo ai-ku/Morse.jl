@@ -10,6 +10,6 @@
 
 
 echo "julia main.jl --lang bg --epochs 100 --dropouts 0.3 --modelType S2SContext"
-julia main.jl --lang bg --epochs 100 --dropouts 0.3 --modelType S2SContext
-echo "julia main.jl --lang bg --epochs 100 --lemma --dropouts 0.3 --modelType S2SContext"
-julia main.jl --lang bg --epochs 100 --lemma --dropouts 0.3 --modelType S2SContext
+julia main.jl --lang bg --epochs 100 --dropouts 0.5 --modelType S2SContext 
+#echo "julia main.jl --lang bg --epochs 100 --lemma --dropouts 0.3 --modelType S2SContext"
+#julia main.jl --lang bg --epochs 100 --lemma --dropouts 0.3 --modelType S2SContext

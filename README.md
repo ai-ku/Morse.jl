@@ -34,7 +34,7 @@ and in [TrMor](https://github.com/ai-ku/TrMor2018) datasets, so you can tag your
 Note: It is optional because running an experiment automatically setups the environment and installs required data (if needed). However, if you didn't run any experiment and want to work on REPL immediately, you need to instantiate and download datasets.
 ```JULIA
    (v1.1) pkg> activate .
-   (v1.1) Morse> instantiate
+   (v1.1) Morse> instantiate # only in the first time
 ```
 
 * #### Data (Optional)
@@ -58,8 +58,8 @@ Note: Limited Support
 
 ```Julia
    julia> using Knet, KnetLayers, Morse
-   julia> model, vocabulary, parser = trained(MorseModel, TRDataSet, vers="2018")
-   julia> predictions = model("Annem sana yardım edemez .", v=vocabulary, p=parser)
+   julia> model, vocabulary, parser = trained(MorseModel, TRDataSet, vers="2018");
+   julia> predictions = model("annem sana yardım edemez .", v=vocabulary, p=parser)
    annem anne+Noun+A3sg+P1sg+Nom
    sana sen+Pron+Pers+A2sg+Pnon+Dat
    yardım yardım+Noun+A3sg+Pnon+Nom
@@ -72,11 +72,12 @@ Note: Limited Support
 Note: Nvidia GPU is required to train on a reasonable time.
 
 ```Julia
-   julia> using Morse
-   julia> config = Morse.intro([]) # default configuration but you can modify
-   julia> config[:logFile] = nothing # to print stdout.
-   julia> dataFiles = ["train.txt", "test.txt"]
+   julia> using Knet, KnetLayers, Morse
+   julia> config = Morse.intro(split("--logFile nothing --lemma --dataSet TRDataSet")) # you can modify the program arguments
+   julia> dataFiles = ["train.txt", "test.txt"] # make sure you have theese files exists in the given path
    julia> data, vocab, parser = prepareData(dataFiles,TRDataSet) # or UDDataSet
+   julia> data = minibatch(data,vocab) # sentence minibatching is required for processing a sentence correctly
    julia> model = MorseModel(config,vocab)
    julia> trainmodel!(model,data,config,vocab,parser) # can take hours or more depends to your data
+   julia> predictions = model("Annem sana yardım edemez .", v=vocabulary, p=parser)
 ```

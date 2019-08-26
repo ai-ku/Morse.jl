@@ -163,9 +163,16 @@ struct Decoder
     dropout::Dropout
 end
 
+function make3D(x)
+    if ndims(x) < 3
+        return reshape(x,size(x)...,1)
+    end
+    return x
+end
+
 function (M::Decoder)(input, hiddens1, hiddens2; training=false)
-    out1   = M.L1(M.dropout(input; enable=training), hiddens1...)
-    out2   = M.L2(M.dropout(out1.y; enable=training), hiddens2...)
+    out1   = M.L1(M.dropout(input; enable=training), make3D.(hiddens1)...)
+    out2   = M.L2(M.dropout(out1.y; enable=training), make3D.(hiddens2)...)
     return (out1.hidden, out1.memory),
            (M.dropout(out2.hidden; enable=training), out2.memory)
 end

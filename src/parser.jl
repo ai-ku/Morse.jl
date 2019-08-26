@@ -73,7 +73,7 @@ EncodedAnalysis(mask::Int, len::Int) = EncodedAnalysis(fill(mask,len), fill(mask
 EncodedAnalysis(a::Analysis; v::Vocabulary) =
 EncodedAnalysis(map(x->get(v.tags, string(x), v.specialIndices.unk)::Int, a.lemma),
                 map(x->get(v.tags, x, v.specialIndices.unk)::Int, a.tags),
-                get(v.comptags, join(a.tags,'|'), v.specialIndices.unk),
+                get(v.comptags, join(a.tags,'+'), v.specialIndices.unk),
                 a.isValid)
 
 """
@@ -132,7 +132,7 @@ function Vocabulary(sets::Vector)
     char2ix, tag2ix, word2ix, ctag2ix=CharDict(), StrDict(), StrDict(), StrDict()
 
     for (i,T) in enumerate(specialTokens)
-        get!(tag2ix,T,i); get!(word2ix,T,i); get!(word2ix,T,i)
+        get!(tag2ix,T,i); get!(word2ix,T,i); get!(ctag2ix,T,i)
         get!(char2ix,T[1],i);
     end
     specialIndicies = (unk=1, mask=2, eow=3, bow=4)
@@ -206,11 +206,16 @@ struct Parser{MyDataSet}
     tagValueSeperator::NString
 end
 
-Parser{UDDataSet}(v=21) =
+Parser{UDDataSet}(v) =
     Parser{UDDataSet}("# text", " ", '\t', '|', ["#"],"_", nothing, "=")
 
-Parser{TRDataSet}(v=2018) =
-    Parser{TRDataSet}("<S", "</S", (v==2018 ? '\t' : ' '), '+', ["<"], "*UNKNOWN*", "^DB", nothing)
+Parser{TRDataSet}(v::Val{2018}) =
+    Parser{TRDataSet}("<S", "</S", '\t', '+', ["<"], "?", "^DB", nothing) # "*UNKNOWN*" => "?"
+
+Parser{TRDataSet}(v::Val{2016}) =
+    Parser{TRDataSet}("<S", "</S", '\t', '+', ["<"], "*UNKNOWN*", "^DB", nothing)  # ' ' => '\t'
+
+Parser{TRDataSet}(v::Val{2006}) = Parser{TRDataSet}(Val(2016))
 
 """
      parseDataLine(line::AbstractString, p::Parser{<:MyDataSet}; wLemma=true, parseAll)
@@ -244,6 +249,7 @@ function Analysis(analysis::AbstractString, p::Parser{TRDataSet}; wLemma=true)
         isValid	= true
         tags    = String[]
         for tag in tokens
+            tag == "Prop" && continue # don't consider proper name tags
             if endswith(tag, p.dbToken)
                 push!(tags, tag[1:end-length(p.dbToken)], p.dbToken)
             else

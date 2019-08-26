@@ -45,7 +45,7 @@ end
 function download(dataset::Type{TRDataSet}; path=dir("data","TrMor2018"))
     if !isdir(path)
         repo = LibGit2.clone("https://github.com/ai-ku/TrMor2018", path)
-        LibGit2.checkout!(repo,"a0675804beea74e45e9faeac7132070655fca828")
+        LibGit2.checkout!(repo,"2b50593e756b36ba7fc3f8b16a9f9f92589710fc")
         run(`ln -s  $(joinpath(path,"TrMor2006","trmor2006.train")) $(joinpath(path,"TrMor2016","trmor2016.train"))`)
     end
 end
@@ -157,7 +157,7 @@ end
 """
 function prepareData(files::Vector{<:AbstractString}, dtype::Type{<:DataSet};
                      vers=2018, seed=31, tsize=typemax(Int), withLemma=true, parseAll=false)
-    parser = Parser{dtype}(vers)
+    parser = Parser{dtype}(Val(vers))
     data = createsplits(parseFile.(files; p=parser, withLemma=withLemma, parseAll=parseAll), seed, tsize)
     vocab = Vocabulary(data)
     return encode.(data, v=vocab), vocab, parser
@@ -191,7 +191,7 @@ end
 # Discriminative
 function StringAnalysis(word::Vector{Int}, output::Int; v::Vocabulary, isgold=false)
     StringAnalysis(join(v.chars[word]), "",
-                   push!(split(v.comptags[output],'|'),v.specialTokens.eow))
+                   push!(split(v.comptags[output],'+'),v.specialTokens.eow))
 end
 
 # Vocabulary is needed for digit masking
@@ -220,6 +220,9 @@ printFormat(predS,parser; f=stdout) =
 function printFormat(f::IO, i::Integer, predStr::NTuple, p::Parser{UDDataSet})
     word, lemma, pos_tag, morph_feats = predStr
     s,u = p.partsSeperator, p.unkToken
+    if startswith(pos_tag,"Upos=")
+        pos_tag = SubString(pos_tag,6:length(pos_tag))
+    end
     write(f,string(i),s,word,s,lemma,s,pos_tag,s,u,s,morph_feats,s,u,s,u,s,u,s,u,'\n')
 end
 
@@ -278,12 +281,13 @@ function evaluate(M::Model, data::Vector{SentenceBatch}, v::Vocabulary, p::Parse
                     accuracy.tag       .+= [Int(tf[2]), 1] .* mul
                     accuracy.complete  .+= [Int(tf[1]&tf[2]), 1] .* mul
                 end
-
             end
             #Generation
             file !== nothing && printFormat(file, i, makeFormat(pred, p), p)
-       end
-   end
+        end
+        T === UDDataSet && file !== nothing && print(file,'\n')
+    end
+   T === UDDataSet && file !== nothing && print(file,"# text = _end_")
    f1macro, f1micro = F1average(F1.precision, F1.recall)
    return (loss=loss[1]/loss[2], accuracies=percentage(acc), amb=percentage(amb),
             f1macro=f1macro, f1micro=f1micro)

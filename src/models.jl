@@ -390,7 +390,7 @@ end
 
 function predict(M::S2SContext, d::SentenceBatch; v::Vocabulary)
     hiddens2 = M.wordEncoder(d.seqInputs, d.seqSizes, d.unsortingIndices; training=false)
-    hiddens1 = M.contextEncoder(hiddens2[1]; training=true)
+    hiddens1 = M.contextEncoder(hiddens2[1]; training=false)
     recurrentPredict(M, d, hiddens1, hiddens2; startIndex=v.specialIndices.bow)
 end
 
@@ -430,7 +430,7 @@ end
 
 function predict(M::Classifier, d::SentenceBatch; v::Vocabulary)
     hiddens2 = M.wordEncoder(d.seqInputs, d.seqSizes, d.unsortingIndices; training=false)
-    hiddens1 = M.contextEncoder(hiddens2[1]; training=true)
+    hiddens1 = M.contextEncoder(hiddens2[1]; training=false)
     scores   = M.output(vcat(hiddens1[1],hiddens2[1]))
     preds    = vec(getindex.(argmax(convert(Array,scores),dims=1),1))
     loss     = M.loss(scores,d.compositeOutputs)
@@ -507,13 +507,13 @@ function recurrentPredict(M::Disambiguator, d::SentenceBatch, hiddens1, hiddens2
                 input   = o
             end
 
-            loss = wtotal/length(seq)
+            loss = wtotal
             if loss < min_loss
                 min_loss = loss; min_loss_seq=seq;
             end
         end
         push!(preds,min_loss_seq)
-        total += min_loss*length(min_loss_seq)
+        total+=min_loss
     end
 
     return PadSequenceArray(preds; pad=v.specialIndices.mask),total
@@ -586,11 +586,10 @@ function  predict(M::MorseDis, d::SentenceBatch; v::Vocabulary)
             input = v.specialIndices.bow
             outEmbedding = [];
             seq = [analysis.lemma; analysis.tags; v.specialIndices.eow]
-            tagRange = length(analysis.lemma)+1:length(seq)-1
 
             for o in seq
                 rnninput = M.outputEmbed([input])
-                if input ∈ tagRange
+                 if input ∉ v.specialIndices && length(v.tags[input])>1
                     push!(outEmbedding,rnninput)
                 end
                 h1, h2 = M.decoder(rnninput, h1, h2; training=false)
@@ -600,14 +599,14 @@ function  predict(M::MorseDis, d::SentenceBatch; v::Vocabulary)
                 input   = o
             end
 
-            loss = wtotal/length(seq)
+            loss = wtotal
             if loss < min_loss
                 min_loss = loss; min_loss_seq=seq; min_outEmbed=outEmbedding;
             end
         end
 
         push!(preds,min_loss_seq)
-        total += min_loss*length(min_loss_seq)
+        total += min_loss
 
         if length(min_outEmbed) != 0
 
@@ -642,8 +641,8 @@ function fgbias!(m::LSTM)
     return m
 end
 
-function transfer!(target::Sequential, tv::Vocabulary, source::Sequential, sv::Vocabulary)
-    for f in (:wordEncoder, :decoder, :contextEncoder, :outputEmbed, :output)
+function transfer!(target, tv::Vocabulary, source, sv::Vocabulary)
+    for f in (:wordEncoder, :decoder, :contextEncoder, :outputEmbed, :output, :outputEncoder)
         if isdefined(target,f) && isdefined(source,f)
             transfer!(getproperty(target,f), tv, getproperty(source,f), sv)
         end
@@ -683,6 +682,10 @@ end
 function transfer!(source::ContextEncoder,sv::Vocabulary,target::ContextEncoder,tv::Vocabulary)
     transfer!(source.encoder,target.encoder)
     transfer!(source.reducer,target.reducer)
+end
+
+function transfer!(source::OutputEncoder,sv::Vocabulary,target::OutputEncoder,tv::Vocabulary)
+    transfer!(source.encoder,target.encoder)
 end
 
 function transfer!(target::WordEncoder, tv::Vocabulary, source::WordEncoder, sv::Vocabulary)

@@ -98,7 +98,7 @@ function main(ARGS=[]; config = intro(ARGS))
                                       tags=length(vocab.tags),
                                       comptags=length(vocab.comptags),
                                       words=length(vocab.words)))
-    
+
     if config[:mode] == 1 # train
         if  config[:modelFile] !== nothing
             model,o,_,_ = loadModel(config[:modelFile])
@@ -107,15 +107,23 @@ function main(ARGS=[]; config = intro(ARGS))
         else
             model = ModelType(config, vocab)
             setoptim!(model, eval(Meta.parse(config[:optimizer])))
-        end 
+        end
     elseif config[:mode] == 2 # generate
-        model,_,_,_ = loadModel(config[:modelFile])
+	source,_,sv,_ = loadModel(config[:modelFile])
+        if isa(source,ModelType)
+            model = source
+        else
+            model = ModelType(config, vocab)
+            transfer!(model,vocab,source,sv)
+        end
+	source=nothing; sv=nothing;
     elseif config[:mode] == 3
         # transfer learning
         model = ModelType(config, vocab)
         setoptim!(model, eval(Meta.parse(config[:optimizer])))
         if config[:sourceModel] !== nothing
-            source,_,sv,_ = loadModel(config[:modelFile])
+	    !isfile(config[:sourceModel]) && error("couldn't found sourceModel in its location!")
+            source,_,sv,_ = loadModel(config[:sourceModel])
             transfer!(model,vocab,source,sv)
             source=nothing; sv=nothing;
         else
@@ -162,7 +170,6 @@ function trainmodel!(M::Model, data::Vector, o::Dict{Symbol,Any}, v::Vocabulary,
                             p::Parser; logFile::IO=stdout, patiance=o[:patiance])
     for i=1:o[:epochs]
         trnloss = trainepoch!(M, data[1], v; wordLimit=o[:wordLimit])
-
         printLog(logFile, "epoch=$i | set=Train | scores: ", (loss=trnloss[1]/trnloss[2],))
         for (k,set) in enumerate((:Dev,:Test))
             scores = evaluate(M, data[k+1], v, p, file=nothing)

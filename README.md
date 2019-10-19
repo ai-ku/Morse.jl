@@ -66,8 +66,9 @@ Note: Nvidia GPU is required to train on a reasonable time.
    julia> config = Morse.intro(split("--logFile nothing --lemma --dataSet TRDataSet")) # you can modify the program arguments
    julia> dataFiles = ["train.txt", "test.txt"] # make sure you have theese files exists in the given path
    julia> data, vocab, parser = prepareData(dataFiles,TRDataSet) # or UDDataSet
-   julia> data = minibatch(data,vocab) # sentence minibatching is required for processing a sentence correctly
+   julia> data = miniBatch(data,vocab) # sentence minibatching is required for processing a sentence correctly
    julia> model = MorseModel(config,vocab)
+   julia> setoptim!(model, SGD(;lr=1.6,gclip=60.0))
    julia> trainmodel!(model,data,config,vocab,parser) # can take hours or more depends to your data
-   julia> predictions = model("Annem sana yardım edemez .", v=vocabulary, p=parser)
+   julia> predictions = model("Annem sana yardım edemez .", v=vocab, p=parser)
 ```

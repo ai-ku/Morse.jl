@@ -14,7 +14,7 @@ Morse is a collection of morphological taggers from the [paper](https://arxiv.or
    git clone https://github.com/ai-ku/Morse.jl
    cd Morse.jl
 ```
-**Note**: Setup and Data is optional because running an experiment automatically setups the environment and installs required data when needed. However, if you're working in a cluster nodes that has no internet connection, you should do these steps, before running the experiments , in the login node that has a connection.
+**Note**: Setup and Data is optional because running an experiment automatically setups the environment and installs required data when needed. However, if you're working in a cluster node that has no internet connection, you need to do these steps somewhere else.
 
 * #### Setup (Optional)
 ```JULIA

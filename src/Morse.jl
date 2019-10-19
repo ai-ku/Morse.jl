@@ -22,7 +22,7 @@ include("models.jl"); export Sequential, Discriminative, Disambiguator,
 include("util.jl"); export download, loadModel, saveModel, setoptim!, lrdecay!,
                            splitdata, createsplits, prepareData, StringAnalysis,
                            evaluate, F1average, F1update!, getLabels,
-                           makeFormat, printFormat;
+                           makeFormat, printFormat,trained;
 
 include("train.jl"); export trainmodel!, trainepoch!;
 

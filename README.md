@@ -16,25 +16,15 @@ and in [TrMor](https://github.com/ai-ku/TrMor2018) datasets, so you can tag your
 
 ## Installation
 
-### For User
-```JULIA
-   (v1.1) pkg> add https://github.com/ai-ku/Morse.jl
-```
-### For Developer
-```JULIA
-   (v1.1) pkg> dev https://github.com/ai-ku/Morse.jl
-```
-### For Exact Replication
-
 ```SHELL
    git clone https://github.com/ai-ku/Morse.jl
    cd Morse.jl
 ```
-* #### Setup (Optional)
-Note: It is optional because running an experiment automatically setups the environment and installs required data (if needed). However, if you didn't run any experiment and want to work on REPL immediately, you need to instantiate and download datasets.
+* #### Setup
+Open Julia in Morse.jl folder, then type `]` to activate pkg mode. After that run the below commands.
 ```JULIA
    (v1.1) pkg> activate .
-   (v1.1) Morse> instantiate
+   (v1.1) Morse> instantiate # only in the first time
 ```
 
 * #### Data (Optional)
@@ -54,19 +44,17 @@ Note: Nvidia GPU is required to train on a reasonable time.
 
 ## Tagging
 
-Note: coming very soon...
+Note: Limited Support
 
 ```Julia
-   julia> using Morse
-   julia> model = download(MorseModel, format=TRDataSet, lang="tr")
-   julia> model("Annem sana yardım edemez .")
-   <S> 
-   anne+Noun+A3sg+P1sg+Nom
-   sen+Pron+Pers+A2sg+Pnon+Dat
-   yardım+Noun+A3sg+Pnon+Nom
-   et+Verb^DB+Verb+Able+Neg+Aor+A3sg
-   .+Punct
-   </S>
+   julia> using Knet, KnetLayers, Morse
+   julia> model, vocabulary, parser = trained(MorseModel, TRDataSet, vers="2018");
+   julia> predictions = model("annem sana yardım edemez .", v=vocabulary, p=parser)
+   annem anne+Noun+A3sg+P1sg+Nom
+   sana sen+Pron+Pers+A2sg+Pnon+Dat
+   yardım yardım+Noun+A3sg+Pnon+Nom
+   edemez et+Verb^DB+Verb+Able+Neg+Aor+A3sg
+   . .+Punct
 ```
 
 ## Customized Training
@@ -74,11 +62,13 @@ Note: coming very soon...
 Note: Nvidia GPU is required to train on a reasonable time.
 
 ```Julia
-   julia> using Morse
-   julia> config = Morse.intro([]) # default configuration but you can modify
-   julia> config[:logFile] = nothing # to print stdout.
-   julia> dataFiles = ["train.txt", "test.txt"]
+   julia> using Knet, KnetLayers, Morse
+   julia> config = Morse.intro(split("--logFile nothing --lemma --dataSet TRDataSet")) # you can modify the program arguments
+   julia> dataFiles = ["train.txt", "test.txt"] # make sure you have theese files exists in the given path
    julia> data, vocab, parser = prepareData(dataFiles,TRDataSet) # or UDDataSet
+   julia> data = miniBatch(data,vocab) # sentence minibatching is required for processing a sentence correctly
    julia> model = MorseModel(config,vocab)
+   julia> setoptim!(model, SGD(;lr=1.6,gclip=60.0))
    julia> trainmodel!(model,data,config,vocab,parser) # can take hours or more depends to your data
+   julia> predictions = model("Annem sana yardım edemez .", v=vocab, p=parser)
 ```

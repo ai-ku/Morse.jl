@@ -17,7 +17,7 @@ and in [TrMor](https://github.com/ai-ku/TrMor2018) datasets, so you can tag your
 ## Installation
 
 ```SHELL
-   git clone https://github.com/ai-ku/Morse.jl
+   git clone https://github.com/ekinakyurek/Morse.jl
    cd Morse.jl
 ```
 * #### Setup

@@ -16,22 +16,12 @@ and in [TrMor](https://github.com/ai-ku/TrMor2018) datasets, so you can tag your
 
 ## Installation
 
-### For User
-```JULIA
-   (v1.1) pkg> add https://github.com/ai-ku/Morse.jl
-```
-### For Developer
-```JULIA
-   (v1.1) pkg> dev https://github.com/ai-ku/Morse.jl
-```
-### For Exact Replication
-
 ```SHELL
    git clone https://github.com/ai-ku/Morse.jl
    cd Morse.jl
 ```
-* #### Setup (Optional)
-Note: It is optional because running an experiment automatically setups the environment and installs required data (if needed). However, if you didn't run any experiment and want to work on REPL immediately, you need to instantiate and download datasets.
+* #### Setup
+Open Julia in Morse.jl folder, then type `]` to activate pkg mode. After that run the below commands.
 ```JULIA
    (v1.1) pkg> activate .
    (v1.1) Morse> instantiate # only in the first time

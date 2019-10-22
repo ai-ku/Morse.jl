@@ -1,11 +1,11 @@
 # Morse
 
-Morse is a collection of morphological taggers from the [paper](https://arxiv.org/abs/1805.07946v1).
+Morse is the morphological analysis model described in:
 
-**Note**: This repo is created just for you to validate the results presented in the paper. If you want to use the models in different settings please refer to this [repo](https://github.com/ekinakyurek/Morse.jl).
+Akyürek, Ekin, Erenay Dayanık, and Deniz Yuret. "Morphological Analysis Using a Sequence Decoder." *Transactions of the Association for Computational Linguistics* 7 (2019): 567-579. ([TACL](https://www.transacl.org/ojs/index.php/tacl/article/view/1654), [arXiv](https://arxiv.org/abs/1805.07946)).
 
 ## Dependencies
-  - Julia 1.1
+  - Julia 1.x
   - Network connection
 
 ## Installation
@@ -14,7 +14,8 @@ Morse is a collection of morphological taggers from the [paper](https://arxiv.or
    git clone https://github.com/ai-ku/Morse.jl
    cd Morse.jl
 ```
-**Note**: Setup and Data is optional because running an experiment automatically setups the environment and installs required data when needed. However, if you're working in a cluster node that has no internet connection, you need to do these steps somewhere else.
+
+**Note**: Setup and Data is optional because running an experiment from the scripts directory automatically sets up the environment and installs required data when needed. However, if you're working in a cluster node that has no internet connection, you may need to perform these steps manually.
 
 * #### Setup (Optional)
 ```JULIA
@@ -31,8 +32,8 @@ Morse is a collection of morphological taggers from the [paper](https://arxiv.or
 
 ## Experiments
 
-To verify the results presented in the paper, you may run the scripts to train models an ablations. During training logs will be created at [logs/](logs/) folder.
+To verify the results presented in the paper, you may run the scripts to train models and ablations. During training logs will be created at [logs/](logs/) folder.
 
 Detailed information about experiments can be found in [scripts/](scripts/README.md)
 
-**Note**: Nvidia GPU is required to train on a reasonable time.
+**Note**: An Nvidia GPU is required to train the models in a reasonable amount of time.

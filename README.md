@@ -1,14 +1,6 @@
 # Morse
 
-[![](https://img.shields.io/badge/docs-latest-blue.svg)](https://ekinakyurek.github.io/Morse.jl/latest)
-[![](https://gitlab.com/JuliaGPU/Morse/badges/master/pipeline.svg)](https://gitlab.com/JuliaGPU/Morse/pipelines)
-[![](https://travis-ci.org/ekinakyurek/Morse.jl.svg?branch=master)](https://travis-ci.org/ekinakyurek/Morse.jl)
-[![codecov](https://codecov.io/gh/ekinakyurek/Morse.jl/branch/master/graph/badge.svg)](https://codecov.io/gh/ekinakyurek/Morse.jl)
-
-Morse is a collection of morphological taggers presented in the [paper](https://arxiv.org/abs/1805.07946v1) that you can train on your data.
-
-Furthermore, Morse provides pre-trained models which are trained in [Universal Dependencies](http://universaldependencies.org)
-and in [TrMor](https://github.com/ai-ku/TrMor2018) datasets, so you can tag your sentences immediately.
+Morse is a collection of morphological taggers from the [paper](https://arxiv.org/abs/1805.07946v1).
 
 ## Dependencies
   - Julia 1.1
@@ -20,8 +12,10 @@ and in [TrMor](https://github.com/ai-ku/TrMor2018) datasets, so you can tag your
    git clone https://github.com/ekinakyurek/Morse.jl
    cd Morse.jl
 ```
-* #### Setup
-Open Julia in Morse.jl folder, then type `]` to activate pkg mode. After that run the below commands.
+
+**Note**: Setup and Data is optional because running an experiment automatically setups the environment and installs required data when needed. However, if you're working in a cluster node that has no internet connection, you need to do these steps somewhere else.
+
+* #### Setup (Optional)
 ```JULIA
    (v1.1) pkg> activate .
    (v1.1) Morse> instantiate # only in the first time
@@ -72,3 +66,6 @@ Note: Nvidia GPU is required to train on a reasonable time.
    julia> trainmodel!(model,data,config,vocab,parser) # can take hours or more depends to your data
    julia> predictions = model("Annem sana yardım edemez .", v=vocab, p=parser)
 ```
+
+
+

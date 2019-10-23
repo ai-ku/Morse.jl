@@ -220,7 +220,7 @@ function evaluate(M::Model, data::Vector{SentenceBatch}, v::Vocabulary, p::Parse
     # Initialize metrics, amb: accuracy metric in ambigious words
     loss, acc, amb, F1 = zeros(2), Accuracy(), Accuracy(), F1Metric()
 
-    for d in data
+    for d in progress(data)
         # Forward Run
         preds, J = predict(M, d; v=v)
         # Cross Entropy Loss Metric

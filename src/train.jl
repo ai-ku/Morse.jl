@@ -206,7 +206,7 @@ end
 function trainepoch!(M::Model, data::Vector{SentenceBatch}, v::Vocabulary; wordLimit=100)
     parameters = params(M)
     trainloss = zeros(2)
-    for (i,d) in enumerate(shuffle(data))
+    for (i,d) in progress(enumerate(shuffle(data)))
         length(d.encodedIOs) > wordLimit && continue
         J = @diff loss(M, d; v=v)
         isnan(value(J)) && continue

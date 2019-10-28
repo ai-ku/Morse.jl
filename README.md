@@ -11,14 +11,15 @@ Akyürek, Ekin, Erenay Dayanık, and Deniz Yuret. "Morphological Analysis Using 
 ## Installation
 
 ```SHELL
-   git clone https://github.com/ekinakyurek/Morse.jl
+   git clone https://github.com/ai-ku/Morse.jl
    cd Morse.jl
 ```
 
-**Note**: Setup and Data is optional because running an experiment from the scripts directory automatically sets up the environment and installs required data when needed. However, if you're working in a cluster node that has no internet connection, you may need to perform these steps manually.
+**Note**: Setup and Data is optional because running an experiment from the scripts directory automatically sets up the environment and installs required data when needed. However, if you're working in a cluster node that has no internet connection, you may need to perform these steps manually. To get the `pkg>` prompt in Julia for package commands please use the ']' key. Backspace gets back to the original `julia>` prompt.
 
 * #### Setup (Optional)
 ```JULIA
+   julia> # Press the `]` key to get the `pkg>` prompt
    (v1.1) pkg> activate .
    (v1.1) Morse> instantiate # only in the first time
 ```

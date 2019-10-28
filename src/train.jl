@@ -10,12 +10,12 @@ function intro(args)
         ("--dataSet"; arg_type=String; default="UDDataSet"; help="TRDataSet or UDDataSet")
         ("--langcode"; arg_type=String; default="fi"; help="lang code for UDDataSet")
         ("--version"; arg_type=Int; default=2018; help="2006 | 2016 | 2018 for TRDataSet")
-        ("--bestModel"; default="../checkpoints/bestModel"; help="path to best model")
+        ("--bestModel"; default=Morse.dir("checkpoints/bestModel"); help="path to best model")
         ("--modelFile"; arg_type=String; help="load a pretrained model")
         ("--sourceModel"; arg_type=String)
         ("--trainSize"; arg_type=Int; default=typemax(Int))
-        ("--logFile"; arg_type=String; default="../logs/morse"; help="log file")
-        ("--genFile"; arg_type=String; default="../generations/morse"; help="file for generations")
+        ("--logFile"; arg_type=String; default=Morse.dir("logs/morse"); help="log file")
+        ("--genFile"; arg_type=String; default=Morse.dir("generations/morse"); help="file for generations")
         ("--hiddenSizes"; nargs='+';arg_type=Int; default=[512,512,512,512];
             help="char-encoder, context-encoder, decoder-l1, decoder-l2")
         ("--embedSizes"; nargs='+';arg_type=Int; default=[64,256])
@@ -27,7 +27,7 @@ function intro(args)
         ("--dropouts"; arg_type=Float64; default= 0.3; help="dropout probabilities")
         ("--decayRate"; arg_type=Float64; default=0.8; help="learning rate decay")
         ("--optimizer"; arg_type=String; default="SGD(;lr=1.6,gclip=60.0)")
-        ("--patiance"; arg_type=Int; default=10; help="number of validation to wait")
+        ("--patience"; arg_type=Int; default=10; help="number of validation to wait")
         ("--mode"; arg_type=Int;default=1; help="1=training, 2=evaluate, 3=transfer")
         ("--epochs"; arg_type=Int; default=1; help="# of epochs for training.")
         ("--wordLimit"; arg_type=Int; default=100; help="maximum # of words in a sentence.")
@@ -157,17 +157,17 @@ end
 
 """
     trainmodel!(M::Model, data::Vector, o::Dict{Symbol,Any}, v::Vocabulary,
-                           p::Parser; logFile::IO=stdout, patiance=o[:patiance])
+                           p::Parser; logFile::IO=stdout, patience=o[:patience])
 
     Trains a `Model` on given data.
     Make sure that you `setoptim!` for model parameters before calling `trainepoch!`
 
-    It applies learning rate decay and early stopping according to patiance argument
+    It applies learning rate decay and early stopping according to patience argument
     It also does evaluations and logs them after each epoch.
 """
 
 function trainmodel!(M::Model, data::Vector, o::Dict{Symbol,Any}, v::Vocabulary,
-                            p::Parser; logFile::IO=stdout, patiance=o[:patiance])
+                            p::Parser; logFile::IO=stdout, patience=o[:patience])
     for i=1:o[:epochs]
         trnloss = trainepoch!(M, data[1], v; wordLimit=o[:wordLimit])
         printLog(logFile, "epoch=$i | set=Train | scores: ", (loss=trnloss[1]/trnloss[2],))
@@ -178,7 +178,7 @@ function trainmodel!(M::Model, data::Vector, o::Dict{Symbol,Any}, v::Vocabulary,
             if acc > o[Symbol(:best,set,:Acc)]
                 o[Symbol(:best,set,:Acc)] = acc;
                 if set == :Dev
-                    patiance = o[:patiance]
+                    patience = o[:patience]
                     saveModel(o[:bestModel]*".jld2", M, o, v, p)
                 end
                 printLog(logFile,"Current Best $set Accuracies: ", scores.accuracies)
@@ -187,10 +187,10 @@ function trainmodel!(M::Model, data::Vector, o::Dict{Symbol,Any}, v::Vocabulary,
 
         i%10==0 && saveModel(o[:bestModel]*"_epoch$i.jld2", M, o, v, p)
 
-        if (patiance -= 1) == o[:patiance] ÷ 2
+        if (patience -= 1) == o[:patience] ÷ 2
             lrdecay!(M,o[:decayRate])
-        elseif patiance < 0
-            printLog(logFile,"patiance < 0, training stops")
+        elseif patience < 0
+            printLog(logFile,"patience < 0, training stops")
             break
         end
 
@@ -206,7 +206,7 @@ end
 function trainepoch!(M::Model, data::Vector{SentenceBatch}, v::Vocabulary; wordLimit=100)
     parameters = params(M)
     trainloss = zeros(2)
-    for (i,d) in enumerate(shuffle(data))
+    for (i,d) in progress(enumerate(shuffle(data)))
         length(d.encodedIOs) > wordLimit && continue
         J = @diff loss(M, d; v=v)
         isnan(value(J)) && continue
@@ -221,3 +221,11 @@ function trainepoch!(M::Model, data::Vector{SentenceBatch}, v::Vocabulary; wordL
     end
     return trainloss
 end
+
+# Knet ambiguity fix (TODO: open Knet issue)
+# ERROR: MethodError: update!(::Knet.KnetArray{Float32,3}, ::Nothing, ::Knet.SGD) is ambiguous. Candidates:
+#   update!(w::Knet.KnetArray{Float32,N} where N, g, p::Knet.SGD) in Knet at /kuacc/users/dyuret/.julia/dev/Knet/src/update.jl:475
+#   update!(w::Knet.KnetArray{Float32,N} where N, g::Nothing, p) in Knet at /kuacc/users/dyuret/.julia/dev/Knet/src/update.jl:547
+# Possible fix, define
+#   update!(::Knet.KnetArray{Float32,N} where N, ::Nothing, ::Knet.SGD)
+Knet.update!(w::KnetArray{Float32}, ::Nothing, ::Knet.SGD) = w

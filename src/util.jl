@@ -76,7 +76,13 @@ end
 """
 function loadModel(fname::AbstractString)
     f = KnetLayers.load(fname)
-    return f["model"], f["opts"], f["vocab"], f["parser"]
+    prms,opts,vocab,parser = f["model"], f["opts"], f["vocab"], f["parser"]
+    ModelType = eval(Meta.parse(opts[:modelType]))
+    model = ModelType(opts,vocab)
+    for (wm,wl) in zip(params(model),prms)
+        copyto!(wm.value,wl)
+    end
+    return model,opts,vocab,parser
 end
 
 """

@@ -40,12 +40,24 @@ Detailed information about experiments can be found in [scripts/](scripts/README
 **Note**: An Nvidia GPU is required to train the models in a reasonable amount of time.
 
 ## Tagging
+Available Pre-Trained Models
 
-Note: Limited Support
+```JULIA
+trained(MorseModel, TRDataSet);
+trained(MorseModel, UDDataSet, lang="ru");
+trained(MorseModel, UDDataSet, lang="da");
+trained(MorseModel, UDDataSet, lang="fi");
+trained(MorseModel, UDDataSet, lang="pt");
+trained(MorseModel, UDDataSet, lang="es");
+trained(MorseModel, UDDataSet, lang="hu");
+trained(MorseModel, UDDataSet, lang="bg");
+trained(MorseModel, UDDataSet, lang="sv");
+```
+How To Use
 
 ```Julia
    julia> using Knet, KnetLayers, Morse
-   julia> model, vocabulary, parser = trained(MorseModel, TRDataSet, vers="2018");
+   julia> model, vocabulary, parser = trained(MorseModel, TRDataSet);
    julia> predictions = model("annem sana yardım edemez .", v=vocabulary, p=parser)
    annem anne+Noun+A3sg+P1sg+Nom
    sana sen+Pron+Pers+A2sg+Pnon+Dat

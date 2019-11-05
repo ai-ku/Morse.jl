@@ -40,20 +40,24 @@ Detailed information about experiments can be found in [scripts/](scripts/README
 **Note**: An Nvidia GPU is required to train the models in a reasonable amount of time.
 
 ## Tagging
+
 Available Pre-Trained Models
 
 ```JULIA
 trained(MorseModel, TRDataSet);
-trained(MorseModel, UDDataSet, lang="ru");
-trained(MorseModel, UDDataSet, lang="da");
-trained(MorseModel, UDDataSet, lang="fi");
-trained(MorseModel, UDDataSet, lang="pt");
-trained(MorseModel, UDDataSet, lang="es");
-trained(MorseModel, UDDataSet, lang="hu");
-trained(MorseModel, UDDataSet, lang="bg");
-trained(MorseModel, UDDataSet, lang="sv");
+trained(MorseModel, UDDataSet, lang="ru"); # Russian
+trained(MorseModel, UDDataSet, lang="da"); # Danish
+trained(MorseModel, UDDataSet, lang="fi"); # Finnish
+trained(MorseModel, UDDataSet, lang="pt"); # Portuguese
+trained(MorseModel, UDDataSet, lang="es"); # Español
+trained(MorseModel, UDDataSet, lang="hu"); # Hungarian
+trained(MorseModel, UDDataSet, lang="bg"); # Bulgarian
+trained(MorseModel, UDDataSet, lang="sv"); # Swedish
 ```
-How To Use
+
+### How To Use
+
+Note: Please use lowercased and tokenized inputs.
 
 ```Julia
    julia> using Knet, KnetLayers, Morse

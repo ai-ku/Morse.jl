@@ -41,11 +41,27 @@ Detailed information about experiments can be found in [scripts/](scripts/README
 
 ## Tagging
 
-Note: Limited Support
+Available Pre-Trained Models
+
+```JULIA
+trained(MorseModel, TRDataSet);
+trained(MorseModel, UDDataSet, lang="ru"); # Russian
+trained(MorseModel, UDDataSet, lang="da"); # Danish
+trained(MorseModel, UDDataSet, lang="fi"); # Finnish
+trained(MorseModel, UDDataSet, lang="pt"); # Portuguese
+trained(MorseModel, UDDataSet, lang="es"); # Español
+trained(MorseModel, UDDataSet, lang="hu"); # Hungarian
+trained(MorseModel, UDDataSet, lang="bg"); # Bulgarian
+trained(MorseModel, UDDataSet, lang="sv"); # Swedish
+```
+
+### How To Use
+
+Note: Please use lowercased and tokenized inputs.
 
 ```Julia
    julia> using Knet, KnetLayers, Morse
-   julia> model, vocabulary, parser = trained(MorseModel, TRDataSet, vers="2018");
+   julia> model, vocabulary, parser = trained(MorseModel, TRDataSet);
    julia> predictions = model("annem sana yardım edemez .", v=vocabulary, p=parser)
    annem anne+Noun+A3sg+P1sg+Nom
    sana sen+Pron+Pers+A2sg+Pnon+Dat

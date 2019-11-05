@@ -50,11 +50,11 @@ function download(dataset::Type{TRDataSet}; path=dir("data","TrMor2018"))
     end
 end
 
-const server_url ="ai.ku.edu.tr/models/morse/"
+const server_url ="people.csail.mit.edu/deniz/models/morse/"
 
-function download(model::Type{T}, format::Type{TRDataSet}; vers="2018", lemma=true, lang="tr") where T
+function download(model::Type{T}, format; vers="2018", lemma=true, lang="tr") where T
     flang = format===TRDataSet ? string("TR-tr",vers) : string("UD-",lang)
-    mname = string(T,"_lemma_",lemma,"_lang_",flang,"_size_full",".jld2")
+    mname = string("bestModel.",T,"_lemma_",lemma,"_lang_",flang,"_size_full","_params.jld2")
     lpath = dir("checkpoints",mname)
     if !isfile(lpath)
         mpath = string(server_url, mname)
@@ -76,7 +76,13 @@ end
 """
 function loadModel(fname::AbstractString)
     f = KnetLayers.load(fname)
-    return f["model"], f["opts"], f["vocab"], f["parser"]
+    prms,opts,vocab,parser = f["model"], f["opts"], f["vocab"], f["parser"]
+    ModelType = eval(Meta.parse(opts[:modelType]))
+    model = ModelType(opts,vocab)
+    for (wm,wl) in zip(params(model),prms)
+        copyto!(wm.value,wl)
+    end
+    return model,opts,vocab,parser
 end
 
 """

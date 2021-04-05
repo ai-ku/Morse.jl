@@ -1,4 +1,4 @@
-using Random, AutoGrad, Knet, KnetLayers
+using Random, AutoGrad, Knet, KnetLayers, CUDA
 """
     intro(args)
 
@@ -21,7 +21,7 @@ function intro(args)
         ("--embedSizes"; nargs='+';arg_type=Int; default=[64,256])
             help="char and output embeddings"
         ("--batchSize"; arg_type=Int; default=1; help="batch size for training")
-        ("--atype"; default=(gpu()>=0 ? "KnetArray{Float32}" : "Array{Float32}"))
+        ("--atype"; default=(CUDA.functional() ? "KnetArray{Float32}" : "Array{Float32}"))
         ("--seed"; arg_type=Int; default=31; help="random number seed.")
         ("--previous"; arg_type=Int; default=2; help="output encoder window")
         ("--dropouts"; arg_type=Float64; default= 0.3; help="dropout probabilities")
